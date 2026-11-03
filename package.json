@@ -7,11 +7,28 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@google/model-viewer": "^4.4.0",
+    "@nuxt/fonts": "^1.2.0",
+    "@nuxt/image": "^2.2.1",
+    "@pinia/nuxt": "^1.0.3",
     "nuxt": "^4.6.3",
+    "pinia": "^4.1.0",
+    "three": "^0.183.2",
     "vue": "^3.5.44",
     "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
+    "@tailwindcss/vite": "^4.3.4",
+    "@types/three": "^0.183.1",
+    "eslint": "^10.14.0",
+    "tailwindcss": "^4.3.4",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.14"
   }
 }

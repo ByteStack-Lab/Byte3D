@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+/* Design tokens — placeholders until the Byte3D brand kit exists. Swap them here only. */
+@theme {
+  --color-bg: #0b0d10;
+  --color-surface: #14171c;
+  --color-surface-2: #1c2027;
+  --color-border: #262b33;
+  --color-text: #f2f4f7;
+  --color-muted: #9aa3af;
+  --color-accent: #ff7a1a;
+  --color-accent-hover: #ff8f3d;
+  --color-accent-2: #22d3ee;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+
+  --font-sans: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-glow: 0 0 0 1px rgb(255 122 26 / 0.5), 0 8px 32px -8px rgb(255 122 26 / 0.35);
+
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.35s ease-out both;
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/*
+ * Theme. Dark is the default (@theme above). Light overrides the same tokens, so every utility
+ * (bg-bg, text-muted, border-border, …) switches with no component changes.
+ *   - `data-theme` is set before first paint by an inline script (nuxt.config.ts) from the saved
+ *     choice, or the device setting when the choice is "system".
+ *   - Without JS, the media query below still follows the device.
+ */
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #f7f6f3;
+  --color-surface: #ffffff;
+  --color-surface-2: #efede8;
+  --color-border: #dedbd3;
+  --color-text: #14171c;
+  --color-muted: #586170;
+  --color-accent: #d4540a;
+  --color-accent-hover: #e8600f;
+  --color-accent-2: #0e7490;
+  --color-success: #15803d;
+  --color-danger: #dc2626;
+  --shadow-glow: 0 0 0 1px rgb(212 84 10 / 0.45), 0 10px 30px -10px rgb(212 84 10 / 0.35);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --color-bg: #f7f6f3;
+    --color-surface: #ffffff;
+    --color-surface-2: #efede8;
+    --color-border: #dedbd3;
+    --color-text: #14171c;
+    --color-muted: #586170;
+    --color-accent: #d4540a;
+    --color-accent-hover: #e8600f;
+    --color-accent-2: #0e7490;
+    --color-success: #15803d;
+    --color-danger: #dc2626;
+    --shadow-glow: 0 0 0 1px rgb(212 84 10 / 0.45), 0 10px 30px -10px rgb(212 84 10 / 0.35);
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-text);
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: rgb(255 122 26 / 0.35);
+  }
+  button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+  img { max-width: 100%; }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 80rem; /* max-w-7xl */
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .container-page { padding-inline: 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .container-page { padding-inline: 2rem; }
+  }
+
+  .skeleton {
+    background-image: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-2) 50%, var(--color-surface) 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Admin-authored product description HTML */
+.description p { margin: 0; }
+.description a { color: var(--color-accent-2); text-decoration: underline; }
+.description strong { color: var(--color-text); }
+.description ul { list-style: disc; padding-left: 1.25rem; }
+.description ol { list-style: decimal; padding-left: 1.25rem; }
+
+/* ---- Hero 3D stage card ------------------------------------------------ */
+.hero-stage {
+  --shadow-ink: 0 0 0;
+  --shadow-k: 1;
+  position: relative;
+  background: linear-gradient(145deg, #323943 0%, #181c22 40%, #0c0e11 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -1px 0 rgb(0 0 0 / 0.6),
+    0 2px 4px rgb(var(--shadow-ink) / calc(0.35 * var(--shadow-k))),
+    0 18px 30px -12px rgb(var(--shadow-ink) / calc(0.55 * var(--shadow-k))),
+    0 48px 80px -28px rgb(var(--shadow-ink) / calc(0.7 * var(--shadow-k))),
+    0 0 100px -30px rgb(255 122 26 / 0.4);
+}
+:root[data-theme="light"] .hero-stage { --shadow-ink: 20 23 28; --shadow-k: 0.6; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .hero-stage { --shadow-ink: 20 23 28; --shadow-k: 0.6; }
+}
+/* soft contact shadow on the "floor" under the card */
+.hero-stage-floor {
+  position: absolute;
+  inset-inline: 8%;
+  bottom: 0;
+  height: 2rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.55), transparent);
+  filter: blur(8px);
+  opacity: 0.8;
+}
+:root[data-theme="light"] .hero-stage-floor { background: radial-gradient(closest-side, rgb(20 23 28 / 0.4), transparent); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .hero-stage-floor { background: radial-gradient(closest-side, rgb(20 23 28 / 0.4), transparent); }
+}
+/* glass sheen + inner edge */
+.hero-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgb(255 255 255 / 0.1) 0%, rgb(255 255 255 / 0.03) 22%, transparent 42%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 10px 30px -12px rgb(0 0 0 / 0.6);
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .hero-stage-wrap { perspective: 1500px; }
+  .hero-stage {
+    transform: rotateY(-9deg) rotateX(4deg);
+    transform-origin: 40% 50%;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+  }
+  .hero-stage-wrap:hover .hero-stage { transform: rotateY(0deg) rotateX(0deg) translateY(-6px); }
+}

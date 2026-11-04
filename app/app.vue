@@ -9,6 +9,8 @@ useHead({
   titleTemplate: title => (title && !title.includes('Byte3D') ? `${title} | Byte3D` : title || 'Byte3D — Custom 3D Printing in Bangladesh'),
 })
 useSeoMeta({
+  // Default share image; product and category pages set their own.
+  ogImage: `${config.public.siteUrl}/images/hero-poster.webp`,
   ogSiteName: 'Byte3D',
   ogType: 'website',
   ogLocale: 'en_BD',

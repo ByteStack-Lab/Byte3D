@@ -18,6 +18,7 @@ export function validateCustomization(schema: CustomizationField[], values: Reco
     }
     if (f.type === 'text' && f.max && v.length > f.max) errors[f.key] = t('custom.errMax', { label: f.label, max: f.max })
     if (f.type === 'url' && !isUrl(v)) errors[f.key] = t('custom.errUrl')
+    if (f.type === 'select' && !f.options?.some(o => o.value === v)) errors[f.key] = t('custom.errChoice', { label: f.label })
   }
   return errors
 }
@@ -42,6 +43,6 @@ export function customizationExtras(schema: CustomizationField[], values: Record
 export function describeCustomization(schema: CustomizationField[] | null, values: Record<string, string>, t: Translate): string[] {
   return Object.entries(values).map(([key, value]) => {
     const field = schema?.find(f => f.key === key)
-    return `${field?.label ?? key}: ${field?.type === 'image' ? t('custom.imageAttachedLower') : value}`
+    return `${field?.label ?? key}: ${field?.type === 'image' ? t('custom.imageAttachedLower') : (field?.options?.find(o => o.value === value)?.label ?? value)}`
   })
 }

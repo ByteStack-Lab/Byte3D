@@ -305,6 +305,8 @@ export const bn: Record<MessageKey, string> = {
   'contact.sendIdea': 'আপনার আইডিয়া বা ফাইল পাঠান',
   'contact.alreadyOrdered': 'আগেই অর্ডার করেছেন?',
   'contact.trackWith': 'আপনার অর্ডার নম্বর ও ফোন নম্বর দিয়ে।',
+  'custom.errChoice': '{label}: তালিকা থেকে একটি বেছে নিন।',
+  'custom.choosePlaceholder': 'বাছুন…',
   'nav.shop': 'শপ',
   'nav.categories': 'ক্যাটেগরি',
   'nav.customKeyring': 'কাস্টম কি-রিং',

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { KeyringType } from '~/utils/keyring'
+import type { KeyringShape } from '~/utils/keyring'
 
 const props = defineProps<{
   lines: string[]
   fontId: string
   keyColor: string
   letterColor: string
-  type: KeyringType
+  type: KeyringShape
 }>()
 
 const uid = useId()
-const font = computed(() => KEYRING_FONTS.find(f => f.id === props.fontId) ?? KEYRING_FONTS[0]!)
+const font = computed(() => fontStyle(props.fontId))
 
 // All geometry is in SVG units where the font size is F. The viewBox is fitted to the measured text,
 // so the whole keyring scales to its container (mobile → desktop) without any media queries.
@@ -89,7 +89,7 @@ const label = computed(() => `Preview of a ${tag.value ? 'bag tag' : 'keyring'} 
         </defs>
 
         <!-- printed base: letters thickened into one solid silhouette, plus the ring tab -->
-        <g :mask="`url(#hole-${uid})`" stroke-linejoin="round" stroke-linecap="round" :class="`kr-f-${font.id}`">
+        <g :mask="`url(#hole-${uid})`" stroke-linejoin="round" stroke-linecap="round" :class="`kr-f-${fontId}`">
           <g :transform="`translate(0 ${depth})`" fill="#000" stroke="#000" opacity="0.32" :stroke-width="S">
             <text v-for="(l, i) in shown" :key="`s${i}`" x="0" :y="lineY(i)">{{ l }}</text>
             <circle :cx="ringCx" :cy="ringCy" :r="ringR" stroke="none" />
@@ -103,7 +103,7 @@ const label = computed(() => `Preview of a ${tag.value ? 'bag tag' : 'keyring'} 
         </g>
 
         <!-- raised letters -->
-        <g :class="`kr-f-${font.id}`">
+        <g :class="`kr-f-${fontId}`">
           <g fill="#000" opacity="0.28" :transform="`translate(0 ${depth / 2})`">
             <text v-for="(l, i) in shown" :key="`d${i}`" x="0" :y="lineY(i)">{{ l }}</text>
           </g>

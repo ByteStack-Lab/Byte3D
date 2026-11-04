@@ -51,11 +51,13 @@ export interface ProductVariant {
 
 export interface CustomizationField {
   key: string
-  type: 'text' | 'image' | 'url'
+  type: 'text' | 'image' | 'url' | 'select'
   label: string
   max?: number
   required: boolean
   extra_price: number
+  /** Only for `select` fields: what the customer can pick (`hex` colours a swatch). */
+  options?: { value: string, label: string, hex: string | null }[]
 }
 
 export interface ProductDetail extends ProductCard {

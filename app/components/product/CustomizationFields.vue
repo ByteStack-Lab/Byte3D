@@ -131,6 +131,23 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
         </p>
       </template>
 
+      <template v-else-if="f.type === 'select'">
+        <select
+          :id="`cf-${f.key}`"
+          :value="values[f.key] ?? ''"
+          :required="f.required"
+          :aria-invalid="!!error(f)"
+          :aria-describedby="`cf-${f.key}-hint`"
+          :class="[input, 'cursor-pointer', error(f) ? 'border-danger' : 'border-border focus:border-accent']"
+          @change="set(f.key, ($event.target as HTMLSelectElement).value)"
+          @blur="touched[f.key] = true"
+        >
+          <option value="" disabled>{{ t('custom.choosePlaceholder') }}</option>
+          <option v-for="o in f.options" :key="o.value" :value="o.value">{{ o.label }}</option>
+        </select>
+        <p :id="`cf-${f.key}-hint`" class="mt-1 text-xs" :class="error(f) ? 'text-danger' : 'text-muted'">{{ error(f) ?? '' }}</p>
+      </template>
+
       <template v-else>
         <div class="flex items-center gap-3 rounded-md border bg-surface-2/50 p-3" :class="images[f.key]?.problem || error(f) ? 'border-danger' : 'border-dashed border-border'">
           <img v-if="images[f.key]?.preview" :src="images[f.key]!.preview!" alt="" class="size-14 shrink-0 rounded-md bg-surface object-contain">

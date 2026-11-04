@@ -303,6 +303,8 @@ export const en = {
   'contact.sendIdea': 'Send your idea or file',
   'contact.alreadyOrdered': 'Already ordered?',
   'contact.trackWith': 'with your order number and phone number.',
+  'custom.errChoice': '{label}: pick one of the choices.',
+  'custom.choosePlaceholder': 'Choose…',
   'nav.shop': 'Shop',
   'nav.categories': 'Categories',
   'nav.customKeyring': 'Custom Keyring',

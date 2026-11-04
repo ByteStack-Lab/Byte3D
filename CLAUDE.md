@@ -242,3 +242,9 @@ The choice lives in the `b3d-lang` cookie, so the server renders the right langu
 - Not translated, on purpose: product/category names and descriptions and the hero text once the admin has edited it (they come from the backend as the
   admin wrote them), server validation messages, district names, the long legal pages (About, Privacy, Terms, Returns) and the name-keyring builder
   (it only prints English letters). The Bangla wording was written by Claude: have a native speaker review it before launch.
+
+## Name keyring builder
+`/custom-keyring` reads the catalogue product `custom-name-keyring` (`KEYRING_PRODUCT_SLUG`): types and colours come from its variants, fonts and letter colours
+from its `select` fields, line count and length from its `line_N` text fields, prices from the variants (shown as an estimate; the cart shows the server's price).
+It adds to the normal cart (no more Messenger hand-off). `app/utils/keyring.ts` holds only how things LOOK: the web font and glyph width per font id, the
+keyring vs bag-tag shape, and the size hint. If the product is missing, the page shows an "unavailable" state instead of hard-coded options.

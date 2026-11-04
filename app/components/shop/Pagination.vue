@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{ current: number, last: number }>()
+const { t } = useLocale()
 const route = useRoute()
 
 // 1 … 4 5 [6] 7 8 … 20
@@ -25,10 +26,10 @@ const base = 'grid size-11 place-items-center rounded-md border text-sm font-med
 </script>
 
 <template>
-  <nav v-if="last > 1" aria-label="Pagination" class="mt-10 flex justify-center">
+  <nav v-if="last > 1" :aria-label="t('page.nav')" class="mt-10 flex justify-center">
     <ul class="flex flex-wrap items-center justify-center gap-2">
       <li>
-        <NuxtLink v-if="current > 1" :to="link(current - 1)" aria-current-value="false" rel="prev" :class="[base, 'border-border hover:border-accent hover:text-accent']" aria-label="Previous page">
+        <NuxtLink v-if="current > 1" :to="link(current - 1)" aria-current-value="false" rel="prev" :class="[base, 'border-border hover:border-accent hover:text-accent']" :aria-label="t('page.prev')">
           <UiIcon name="chevron-left" :size="18" />
         </NuxtLink>
         <span v-else :class="[base, 'border-border/50 text-muted/40']" aria-hidden="true"><UiIcon name="chevron-left" :size="18" /></span>
@@ -38,7 +39,7 @@ const base = 'grid size-11 place-items-center rounded-md border text-sm font-med
         <NuxtLink
           v-else
           :to="link(p)"
-          :aria-label="`Page ${p}`"
+          :aria-label="t('page.n', { n: p })"
           :aria-current-value="p === current ? 'page' : 'false'"
           :class="[base, p === current ? 'border-accent bg-accent text-on-accent' : 'border-border hover:border-accent hover:text-accent']"
         >
@@ -46,7 +47,7 @@ const base = 'grid size-11 place-items-center rounded-md border text-sm font-med
         </NuxtLink>
       </li>
       <li>
-        <NuxtLink v-if="current < last" :to="link(current + 1)" aria-current-value="false" rel="next" :class="[base, 'border-border hover:border-accent hover:text-accent']" aria-label="Next page">
+        <NuxtLink v-if="current < last" :to="link(current + 1)" aria-current-value="false" rel="next" :class="[base, 'border-border hover:border-accent hover:text-accent']" :aria-label="t('page.next')">
           <UiIcon name="chevron-right" :size="18" />
         </NuxtLink>
         <span v-else :class="[base, 'border-border/50 text-muted/40']" aria-hidden="true"><UiIcon name="chevron-right" :size="18" /></span>

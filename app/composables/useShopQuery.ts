@@ -1,3 +1,4 @@
+import type { MessageKey } from '~/locales/en'
 import type { LocationQuery } from 'vue-router'
 import type { ProductQuery, SortKey } from '~/types/api'
 
@@ -9,11 +10,11 @@ const first = (v: LocationQuery[string] | undefined): string | undefined => {
 }
 const split = (v?: string) => (v ? v.split(',').map(s => s.trim()).filter(Boolean) : [])
 
-export const SORT_OPTIONS: { value: SortKey, label: string }[] = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'price_asc', label: 'Price: low to high' },
-  { value: 'price_desc', label: 'Price: high to low' },
-  { value: 'popular', label: 'Popular' },
+export const SORT_OPTIONS: { value: SortKey, key: MessageKey }[] = [
+  { value: 'newest', key: 'sort.newest' },
+  { value: 'price_asc', key: 'sort.priceAsc' },
+  { value: 'price_desc', key: 'sort.priceDesc' },
+  { value: 'popular', key: 'sort.popular' },
 ]
 
 /** Filter values as the UI edits them. Prices are in taka here; the URL and API use paisa. */

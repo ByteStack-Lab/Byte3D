@@ -2,11 +2,12 @@
 import type { HomeData } from '~/types/api'
 
 const abs = useAbsoluteUrl()
+const { t } = useLocale()
 const { data, error, refresh, status } = await useApi<{ data: HomeData }>('/home')
 
 useSeoMeta({
-  title: 'Byte3D — Custom 3D Printing, Gifts & Prototypes in Bangladesh',
-  description: 'Custom 3D printing, personalised keychains, NFC keychains, fidget toys, gifts and prototypes. Delivery across Bangladesh. Cash on delivery.',
+  title: () => t('home.seoTitle'),
+  description: () => t('home.seoDescription'),
   ogTitle: 'Byte3D — We bring your ideas to life',
   ogDescription: 'Custom 3D printing, personalised gifts, prototypes and unique 3D products.',
   ogImage: () => abs(data.value?.data.featured_products[0]?.thumbnail.url ?? '/images/hero-poster.webp'),
@@ -30,11 +31,11 @@ useCanonical('/')
 
   <div v-else class="container-page py-20">
     <UiEmptyState
-      title="We couldn’t load the store"
-      :description="error?.message ?? 'Please check your connection and try again.'"
+      :title="t('home.loadError')"
+      :description="error?.message ?? t('common.checkConnection')"
       icon="info"
     >
-      <UiButton @click="refresh()">Try again</UiButton>
+      <UiButton @click="refresh()">{{ t('common.tryAgain') }}</UiButton>
     </UiEmptyState>
   </div>
 </template>

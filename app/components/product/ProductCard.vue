@@ -3,12 +3,13 @@ import type { ProductCard } from '~/types/api'
 
 const props = withDefaults(defineProps<{ product: ProductCard, priority?: boolean }>(), { priority: false })
 
+const { t } = useLocale()
 const salePercent = computed(() => discountPercent(props.product.price, props.product.compare_at_price))
 const href = computed(() => `/products/${props.product.slug}`)
 const cta = computed(() => {
-  if (!props.product.in_stock) return { label: 'Out of stock', disabled: true }
-  if (props.product.is_customizable) return { label: 'Customize', disabled: false }
-  return { label: 'View details', disabled: false }
+  if (!props.product.in_stock) return { label: t('product.outOfStock'), disabled: true }
+  if (props.product.is_customizable) return { label: t('product.customize'), disabled: false }
+  return { label: t('product.viewDetails'), disabled: false }
 })
 </script>
 
@@ -41,12 +42,12 @@ const cta = computed(() => {
 
       <div class="absolute left-2 top-2 flex flex-wrap gap-1.5">
         <UiBadge v-if="salePercent" variant="sale" overlay>−{{ salePercent }}%</UiBadge>
-        <UiBadge v-if="product.badges.includes('new')" variant="new" overlay>New</UiBadge>
-        <UiBadge v-if="product.badges.includes('customizable')" variant="customizable" overlay>Customizable</UiBadge>
+        <UiBadge v-if="product.badges.includes('new')" variant="new" overlay>{{ t('product.badgeNew') }}</UiBadge>
+        <UiBadge v-if="product.badges.includes('customizable')" variant="customizable" overlay>{{ t('product.badgeCustomizable') }}</UiBadge>
       </div>
 
       <div v-if="!product.in_stock" class="absolute inset-0 grid place-items-center bg-bg/60 backdrop-blur-[1px]">
-        <span class="rounded-full bg-bg/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted ring-1 ring-border">Sold out</span>
+        <span class="rounded-full bg-bg/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted ring-1 ring-border">{{ t('product.soldOut') }}</span>
       </div>
     </div>
 

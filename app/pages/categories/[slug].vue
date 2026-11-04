@@ -2,6 +2,7 @@
 import type { Category } from '~/types/api'
 
 const route = useRoute()
+const { t } = useLocale()
 const slug = computed(() => String(route.params.slug))
 const abs = useAbsoluteUrl()
 
@@ -13,7 +14,7 @@ const category = computed(() => data.value!.data)
 
 const page = computed(() => Number(route.query.page) || 1)
 useSeoMeta({
-  title: () => `${category.value.name}${page.value > 1 ? ` — page ${page.value}` : ''}`,
+  title: () => `${category.value.name}${page.value > 1 ? ` — ${t('common.pageN', { n: page.value })}` : ''}`,
   description: () => category.value.description,
   ogTitle: () => `${category.value.name} | Byte3D`,
   ogDescription: () => category.value.description,
@@ -36,10 +37,10 @@ useCanonical(() => `/categories/${slug.value}${page.value > 1 ? `?page=${page.va
       />
       <div class="absolute inset-0 -z-10 bg-gradient-to-r from-bg via-bg/85 to-bg/30" />
       <div class="container-page py-10 sm:py-16">
-        <UiBreadcrumbs :items="[{ label: 'Home', to: '/' }, { label: 'Shop', to: '/shop' }, { label: category.name }]" />
+        <UiBreadcrumbs :items="[{ label: t('nav.home'), to: '/' }, { label: t('nav.shop'), to: '/shop' }, { label: category.name }]" />
         <h1 class="mt-4 text-3xl font-bold sm:text-5xl">{{ category.name }}</h1>
         <p class="mt-3 max-w-2xl text-base text-muted sm:text-lg">{{ category.description }}</p>
-        <p class="mt-4 text-sm text-muted">{{ category.product_count }} products</p>
+        <p class="mt-4 text-sm text-muted">{{ t('home.productCount', { n: category.product_count }) }}</p>
       </div>
     </section>
 

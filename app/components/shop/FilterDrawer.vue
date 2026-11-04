@@ -3,6 +3,7 @@ import type { ProductFilters } from '~/types/api'
 import { emptyFilterState, type FilterState } from '~/composables/useShopQuery'
 
 const props = defineProps<{ filters?: ProductFilters | null, hideCategory?: boolean, current: FilterState }>()
+const { t } = useLocale()
 const open = defineModel<boolean>('open', { required: true })
 const emit = defineEmits<{ apply: [state: FilterState] }>()
 
@@ -37,13 +38,13 @@ function apply() {
         ref="panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Filters"
+        :aria-label="t('filter.title')"
         class="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-xl border-t border-border bg-bg shadow-2xl lg:hidden"
       >
         <div class="mx-auto mt-2 h-1 w-10 rounded-full bg-border" aria-hidden="true" />
         <div class="flex items-center justify-between px-5 py-3">
-          <h2 class="text-lg font-semibold">Filters</h2>
-          <button type="button" class="grid size-11 place-items-center rounded-md text-muted hover:text-text" aria-label="Close filters" @click="open = false">
+          <h2 class="text-lg font-semibold">{{ t('filter.title') }}</h2>
+          <button type="button" class="grid size-11 place-items-center rounded-md text-muted hover:text-text" :aria-label="t('filter.close')" @click="open = false">
             <UiIcon name="close" :size="22" />
           </button>
         </div>
@@ -51,8 +52,8 @@ function apply() {
           <ShopFilterPanel v-model="draft" :filters="filters" :hide-category="hideCategory" id-prefix="drawer" />
         </div>
         <div class="flex gap-3 border-t border-border bg-bg p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <UiButton variant="secondary" class="flex-1" @click="draft = emptyFilterState()">Clear</UiButton>
-          <UiButton class="flex-[2]" @click="apply">Apply</UiButton>
+          <UiButton variant="secondary" class="flex-1" @click="draft = emptyFilterState()">{{ t('filter.clear') }}</UiButton>
+          <UiButton class="flex-[2]" @click="apply">{{ t('filter.apply') }}</UiButton>
         </div>
       </div>
     </Transition>

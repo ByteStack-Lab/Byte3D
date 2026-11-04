@@ -4,6 +4,7 @@ import type { FilterState } from '~/composables/useShopQuery'
 import type { Chip } from './ActiveFilters.vue'
 
 const props = defineProps<{ lockedCategory?: string }>()
+const { t } = useLocale()
 
 const { query, apiQuery, filterState, page, sort, update, applyFilters, clearAll } = useShopQuery(() => props.lockedCategory)
 
@@ -18,6 +19,10 @@ const { data, status, error, refresh } = await useApi<Paginated<ProductCard>>('/
 const products = computed(() => data.value?.data ?? [])
 const meta = computed(() => data.value?.meta)
 const loading = computed(() => status.value === 'pending')
+/** "Showing 1–24 of 60 products", with the total in bold. Built from numbers only, so rendering it as HTML is safe. */
+const showing = computed(() => (meta.value
+  ? t('shop.showing', { from: meta.value.from ?? 0, to: meta.value.to ?? 0, total: `<strong class="text-text">${meta.value.total}</strong>` })
+  : ''))
 
 const hideCategory = computed(() => !!props.lockedCategory)
 const drawerOpen = ref(false)
@@ -59,7 +64,7 @@ watch(page, () => {
     />
 
     <div id="results" class="min-w-0 flex-1 scroll-mt-20">
-      <h2 class="sr-only">Products</h2>
+      <h2 class="sr-only">{{ t('shop.products') }}</h2>
       <div class="flex flex-col gap-3 sm:flex-row">
         <div class="flex-1">
           <ShopSearchInput :model-value="query.q ?? ''" @update:model-value="v => update({ q: v || undefined })" />
@@ -71,7 +76,7 @@ watch(page, () => {
             aria-haspopup="dialog"
             @click="drawerOpen = true"
           >
-            <UiIcon name="filter" :size="18" /> Filter
+            <UiIcon name="filter" :size="18" /> {{ t('shop.filter') }}
             <span v-if="activeCount" class="grid size-5 place-items-center rounded-full bg-accent text-xs font-bold text-on-accent">{{ activeCount }}</span>
           </button>
           <div class="flex-1 sm:w-52 sm:flex-none">
@@ -83,10 +88,11 @@ watch(page, () => {
       <div class="mt-4 flex flex-col gap-3">
         <p class="text-sm text-muted" aria-live="polite">
           <template v-if="meta && !loading">
-            <template v-if="meta.total">Showing {{ meta.from }}–{{ meta.to }} of <strong class="text-text">{{ meta.total }}</strong> products</template>
-            <template v-else>No products found</template>
+            <!-- eslint-disable-next-line vue/no-v-html -- only numbers from our own API go into the markup -->
+            <span v-if="meta.total" v-html="showing" />
+            <template v-else>{{ t('shop.noneFound') }}</template>
           </template>
-          <template v-else>Loading products…</template>
+          <template v-else>{{ t('shop.loadingProducts') }}</template>
         </p>
         <ShopActiveFilters
           :state="filterState"
@@ -99,27 +105,27 @@ watch(page, () => {
       </div>
 
       <div class="mt-5">
-        <ul v-if="loading" class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4" aria-busy="true" aria-label="Loading products">
+        <ul v-if="loading" class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4" aria-busy="true" :aria-label="t('shop.loadingLabel')">
           <li v-for="n in 8" :key="n"><ProductCardSkeleton /></li>
         </ul>
 
         <UiEmptyState
           v-else-if="error"
-          title="We couldn’t load products"
+          :title="t('shop.loadError')"
           :description="error.message"
           icon="info"
         >
-          <UiButton @click="refresh()">Try again</UiButton>
+          <UiButton @click="refresh()">{{ t('common.tryAgain') }}</UiButton>
         </UiEmptyState>
 
         <UiEmptyState
           v-else-if="!products.length"
-          title="No products match your filters"
-          description="Try removing a filter or searching for something else."
+          :title="t('shop.noMatch')"
+          :description="t('shop.noMatchHint')"
           icon="search"
         >
-          <UiButton v-if="hasAnyFilter" @click="clearAll">Reset filters</UiButton>
-          <UiButton variant="secondary" to="/custom-order">Request a custom print</UiButton>
+          <UiButton v-if="hasAnyFilter" @click="clearAll">{{ t('shop.resetFilters') }}</UiButton>
+          <UiButton variant="secondary" to="/custom-order">{{ t('shop.requestCustom') }}</UiButton>
         </UiEmptyState>
 
         <ul v-else class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">

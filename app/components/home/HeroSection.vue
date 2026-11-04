@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import type { HomeData } from '~/types/api'
 
+import { en, type MessageKey } from '~/locales/en'
+
 defineProps<{ hero: HomeData['hero'] }>()
+const { t } = useLocale()
+
+/** Hero text is edited in the admin (English). While it is still the shipped default, show it in the visitor's language. */
+const text = (value: string, key: MessageKey) => (value === en[key] ? t(key) : value)
 
 const ready = ref(false)
 const trust = [
-  { icon: 'palette', label: 'Custom designs' },
-  { icon: 'truck', label: 'Delivery across Bangladesh' },
-  { icon: 'wallet', label: 'Cash on delivery' },
+  { icon: 'palette', key: 'hero.trustCustom' as const },
+  { icon: 'truck', key: 'footer.delivery' as const },
+  { icon: 'wallet', key: 'footer.cod' as const },
 ]
 </script>
 
@@ -19,25 +25,25 @@ const trust = [
       <!-- Text is SSR HTML and the LCP element; the canvas never blocks it. -->
       <div class="animate-fade-up">
         <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1 text-xs font-medium text-muted">
-          <span class="size-1.5 animate-pulse rounded-full bg-accent" /> Now printing in Dhaka
+          <span class="size-1.5 animate-pulse rounded-full bg-accent" /> {{ t('hero.nowPrinting') }}
         </p>
         <h1 class="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-          {{ hero.headline }}
+          {{ text(hero.headline, 'hero.defaultHeadline') }}
         </h1>
         <p class="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-          {{ hero.subheadline }}
+          {{ text(hero.subheadline, 'hero.defaultSubheadline') }}
         </p>
         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
           <UiButton :to="hero.primary_cta.href" size="lg">
-            {{ hero.primary_cta.label }} <UiIcon name="arrow-right" :size="18" />
+            {{ text(hero.primary_cta.label, 'hero.defaultShopNow') }} <UiIcon name="arrow-right" :size="18" />
           </UiButton>
           <UiButton :to="hero.secondary_cta.href" variant="secondary" size="lg">
-            {{ hero.secondary_cta.label }}
+            {{ text(hero.secondary_cta.label, 'nav.customOrder') }}
           </UiButton>
         </div>
         <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-          <li v-for="t in trust" :key="t.label" class="inline-flex items-center gap-2">
-            <UiIcon :name="t.icon" :size="16" class="text-accent" /> {{ t.label }}
+          <li v-for="item in trust" :key="item.key" class="inline-flex items-center gap-2">
+            <UiIcon :name="item.icon" :size="16" class="text-accent" /> {{ t(item.key) }}
           </li>
         </ul>
       </div>
@@ -46,7 +52,7 @@ const trust = [
       <div
         class="hero-stage-wrap relative mx-auto w-full max-w-xl pb-8 lg:max-w-none"
         role="img"
-        aria-label="A 3D printer building a product layer by layer"
+        :aria-label="t('hero.imageLabel')"
       >
         <div class="hero-stage-floor" aria-hidden="true" />
         <div class="hero-stage rounded-[1.6rem] p-[7px]">

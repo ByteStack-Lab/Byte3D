@@ -2,6 +2,7 @@
 import type { Category } from '~/types/api'
 
 defineProps<{ category: Category }>()
+const { t } = useLocale()
 </script>
 
 <template>
@@ -22,7 +23,7 @@ defineProps<{ category: Category }>()
     <div class="absolute inset-x-0 bottom-0 p-3 sm:p-4">
       <h3 class="font-display text-sm font-semibold leading-tight text-white sm:text-lg">{{ category.name }}</h3>
       <p class="mt-0.5 flex items-center gap-1 text-xs text-white/75 sm:text-sm">
-        {{ category.product_count }} products
+        {{ t('home.productCount', { n: category.product_count }) }}
         <UiIcon name="arrow-right" :size="14" class="transition group-hover:translate-x-1 group-hover:text-accent" />
       </p>
     </div>

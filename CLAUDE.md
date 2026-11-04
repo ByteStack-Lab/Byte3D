@@ -1,6 +1,7 @@
 # Frontend — Nuxt 4 Storefront + Three.js
 
-Read `../CLAUDE.md` first: shared rules, API contract and phases live there. This file covers
+This repo is the Byte3D storefront only. The shared rules, the API contract and the phases live in the Byte3D monorepo (`CLAUDE.md` at its root) and the backend
+project (`backend/CLAUDE.md`), which this repo does not contain; it talks to that API over HTTP. This file covers
 how the storefront is built.
 
 ## Setup (only if `frontend/` is empty)
@@ -213,7 +214,7 @@ testimonials, prototype CTA banner.
 Cart, checkout and account calls go through `$send()` (`composables/useApi.ts`): it sends the Sanctum session cookie,
 fetches `/sanctum/csrf-cookie` when needed and echoes `X-XSRF-TOKEN` (retrying once on 419). `/cart`, `/checkout`,
 `/account` and `/order/**` are client-rendered, so none of this runs on the server. Request/response shapes for these
-endpoints are in `../backend/CLAUDE.md` ("Phase 3 API details") and `app/types/api.ts`.
+endpoints are in the backend project's `CLAUDE.md` ("Phase 3 API details") and `app/types/api.ts`.
 
 ## Rules
 - All API calls go through `useApi` with types from `types/api.ts`. No scattered raw `fetch`.

@@ -1,7 +1,8 @@
 import type { CustomizationField } from '~/types/api'
 
-/** Image uploads need the phase 4 endpoint. Until then a required image field cannot be completed online. */
-export const IMAGE_UPLOAD_SOON = 'Image upload opens soon. For now, order this item on Facebook.'
+/** Engraving images: what POST /uploads/customization accepts. Mirrors the server rules. */
+export const IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp'
+export const IMAGE_MAX_BYTES = 5 * 1024 * 1024
 
 const isUrl = (v: string) => /^https?:\/\/[^\s.]+\.[^\s]{2,}$/i.test(v)
 
@@ -10,12 +11,8 @@ export function validateCustomization(schema: CustomizationField[], values: Reco
   const errors: Record<string, string> = {}
   for (const f of schema) {
     const v = (values[f.key] ?? '').trim()
-    if (f.type === 'image') {
-      if (f.required) errors[f.key] = IMAGE_UPLOAD_SOON
-      continue
-    }
     if (!v) {
-      if (f.required) errors[f.key] = `${f.label} is required.`
+      if (f.required) errors[f.key] = f.type === 'image' ? `Upload an image for “${f.label}”.` : `${f.label} is required.`
       continue
     }
     if (f.type === 'text' && f.max && v.length > f.max) errors[f.key] = `${f.label} can be at most ${f.max} characters.`
@@ -24,11 +21,10 @@ export function validateCustomization(schema: CustomizationField[], values: Reco
   return errors
 }
 
-/** Only the schema's text/url fields that are filled in, trimmed. This is what goes into the cart. */
+/** Only the schema's fields that are filled in, trimmed (an image field holds its upload token). This is what goes into the cart. */
 export function cleanCustomization(schema: CustomizationField[], values: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {}
   for (const f of schema) {
-    if (f.type === 'image') continue
     const v = (values[f.key] ?? '').trim()
     if (v) out[f.key] = v
   }
@@ -44,7 +40,7 @@ export function customizationExtras(schema: CustomizationField[], values: Record
 /** "Name on keychain: Tanvir" lines for cart and order summaries. */
 export function describeCustomization(schema: CustomizationField[] | null, values: Record<string, string>): string[] {
   return Object.entries(values).map(([key, value]) => {
-    const label = schema?.find(f => f.key === key)?.label ?? key
-    return `${label}: ${value}`
+    const field = schema?.find(f => f.key === key)
+    return `${field?.label ?? key}: ${field?.type === 'image' ? 'image attached' : value}`
   })
 }

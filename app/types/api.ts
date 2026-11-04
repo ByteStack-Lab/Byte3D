@@ -254,3 +254,11 @@ export interface AccountUser {
   phone: string | null
   email: string | null
 }
+
+/** `POST /uploads/customization` → the token is the value of an `image` customization field. */
+export interface CustomizationUpload {
+  upload_token: string
+  name: string
+  size: number
+  expires_at: string
+}

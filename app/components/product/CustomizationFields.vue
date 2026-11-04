@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { CustomizationField } from '~/types/api'
+import type { CustomizationField, CustomizationUpload } from '~/types/api'
+import { IMAGE_ACCEPT, IMAGE_MAX_BYTES } from '~/utils/customization'
 
 const props = defineProps<{
   schema: CustomizationField[]
@@ -12,13 +13,62 @@ const touched = reactive<Record<string, boolean>>({})
 const errors = computed(() => validateCustomization(props.schema, values.value))
 
 function error(f: CustomizationField): string | null {
-  if (f.type === 'image') return null // explained by the note below the field
   return props.showErrors || touched[f.key] ? (errors.value[f.key] ?? null) : null
 }
 
 function set(key: string, value: string) {
   values.value = { ...values.value, [key]: value }
 }
+
+/** Per image field: what the shopper picked. The token (the field's value) comes back from the server. */
+interface ImageState { name: string, preview: string | null, busy: boolean, problem: string | null }
+const images = reactive<Record<string, ImageState | undefined>>({})
+
+function dropImage(key: string) {
+  const preview = images[key]?.preview
+  if (preview) URL.revokeObjectURL(preview)
+  images[key] = undefined
+  const { [key]: _removed, ...rest } = values.value
+  values.value = rest
+}
+
+async function pickImage(f: CustomizationField, event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = '' // picking the same file again must fire `change`
+  if (!file) return
+
+  touched[f.key] = true
+  const previous = images[f.key]?.preview
+  if (previous) URL.revokeObjectURL(previous)
+
+  if (!IMAGE_ACCEPT.split(',').includes(file.type)) {
+    images[f.key] = { name: file.name, preview: null, busy: false, problem: 'Upload a PNG, JPG or WebP image.' }
+    return
+  }
+  if (file.size > IMAGE_MAX_BYTES) {
+    images[f.key] = { name: file.name, preview: null, busy: false, problem: 'The image must be 5 MB or smaller.' }
+    return
+  }
+
+  images[f.key] = { name: file.name, preview: URL.createObjectURL(file), busy: true, problem: null }
+  const body = new FormData()
+  body.append('file', file)
+  try {
+    const res = await $api<{ data: CustomizationUpload }>('/uploads/customization', { method: 'POST', body })
+    // The shopper may have removed or replaced the image while it was uploading.
+    if (images[f.key]?.name === file.name) {
+      images[f.key]!.busy = false
+      set(f.key, res.data.upload_token)
+    }
+  }
+  catch (e) {
+    const err = toApiError(e)
+    images[f.key] = { name: file.name, preview: null, busy: false, problem: err.errors.file?.[0] ?? err.message }
+  }
+}
+
+onBeforeUnmount(() => Object.values(images).forEach(i => i?.preview && URL.revokeObjectURL(i.preview)))
 
 const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeholder:text-muted/70 focus:outline-none'
 </script>
@@ -81,11 +131,39 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
       </template>
 
       <template v-else>
-        <!-- Real upload arrives with phase 4 (POST /uploads/customization). -->
-        <div :id="`cf-${f.key}`" class="flex items-center gap-3 rounded-md border border-dashed border-border bg-surface-2/50 p-4 text-sm text-muted" role="note">
-          <UiIcon name="upload" :size="20" class="shrink-0 text-muted" />
-          <span>Image upload opens soon. For now, send your file when you order on Facebook.</span>
+        <div class="flex items-center gap-3 rounded-md border bg-surface-2/50 p-3" :class="images[f.key]?.problem || error(f) ? 'border-danger' : 'border-dashed border-border'">
+          <img v-if="images[f.key]?.preview" :src="images[f.key]!.preview!" alt="" class="size-14 shrink-0 rounded-md bg-surface object-contain">
+          <UiIcon v-else name="upload" :size="22" class="shrink-0 text-muted" />
+          <div class="min-w-0 flex-1 text-sm">
+            <template v-if="images[f.key] && !images[f.key]!.problem">
+              <p class="truncate font-medium">{{ images[f.key]!.name }}</p>
+              <p class="text-xs text-muted" aria-live="polite">{{ images[f.key]!.busy ? 'Uploading…' : 'Image attached' }}</p>
+            </template>
+            <template v-else-if="values[f.key]">
+              <p class="font-medium">Image attached</p>
+            </template>
+            <p v-else class="text-muted">PNG, JPG or WebP, up to 5 MB</p>
+          </div>
+          <label
+            :for="`cf-${f.key}`"
+            class="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-surface px-3 text-sm font-semibold transition hover:border-accent hover:text-accent focus-within:outline-2 focus-within:outline-accent"
+          >
+            {{ values[f.key] || images[f.key] ? 'Change' : 'Choose image' }}
+            <input
+              :id="`cf-${f.key}`" type="file" class="sr-only" :accept="IMAGE_ACCEPT" :aria-invalid="!!(images[f.key]?.problem || error(f))"
+              :aria-describedby="`cf-${f.key}-hint`" :disabled="images[f.key]?.busy" @change="pickImage(f, $event)"
+            >
+          </label>
+          <button
+            v-if="values[f.key] || images[f.key]" type="button" class="grid size-10 shrink-0 place-items-center rounded-md text-muted transition hover:text-danger"
+            :aria-label="`Remove ${f.label}`" @click="dropImage(f.key)"
+          >
+            <UiIcon name="trash" :size="18" />
+          </button>
         </div>
+        <p :id="`cf-${f.key}-hint`" class="mt-1 text-xs" :class="images[f.key]?.problem || error(f) ? 'text-danger' : 'text-muted'" :role="images[f.key]?.problem ? 'alert' : undefined">
+          {{ images[f.key]?.problem ?? error(f) ?? 'Use a clear, high-contrast image. We will check it before engraving.' }}
+        </p>
       </template>
     </div>
   </fieldset>

@@ -225,3 +225,9 @@ endpoints are in `../backend/CLAUDE.md` ("Phase 3 API details") and `app/types/a
 - Semantic HTML, alt text, keyboard-accessible filters and drawer, focus trap in drawers.
 - Per-page SEO: title, description, canonical URL, og:image. `noindex` on cart and checkout.
 - Keep `three` confined to the hero and product 3D chunks — check the build output when adding 3D code.
+
+## Production
+`NUXT_PUBLIC_API_BASE=https://api.byte3d.store/api/v1`, `NUXT_PUBLIC_SITE_URL=https://byte3d.store` (used by canonical links, the sitemap and
+robots.txt), optional `NUXT_PUBLIC_GA_ID`. The Meta Pixel ID comes from the backend admin, not from here. Build with `npm run build` and run
+`node .output/server/index.mjs` behind a reverse proxy with TLS (use Supervisor or pm2 to keep it up). The sitemap is cached for an hour.
+Before launch: run Lighthouse (mobile) on `/`, a category and a product page; the budget is Performance ≥ 85.

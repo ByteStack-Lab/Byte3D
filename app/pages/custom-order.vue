@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { QUOTE_DETAILS_MAX, QUOTE_DETAILS_MIN, QUOTE_SERVICE_TYPES, type QuoteServiceType } from '~/utils/quote'
+import {
+  QUOTE_DETAILS_MAX, QUOTE_DETAILS_MIN, QUOTE_FILE_ACCEPT, QUOTE_MAX_FILES, QUOTE_SERVICE_TYPES,
+  formatFileSize, quoteFileProblem, type QuoteServiceType,
+} from '~/utils/quote'
 
 useSeoMeta({
   title: 'Custom 3D printing order',
@@ -16,7 +19,30 @@ const steps = [
   { n: '3', title: 'We print & deliver', text: 'Printed, finished and delivered across Bangladesh.' },
 ]
 
-const form = reactive({ service_type: '' as QuoteServiceType | '', name: '', phone: '', description: '' })
+const emptyForm = () => ({ service_type: '' as QuoteServiceType | '', name: '', phone: '', description: '', email: '', quantity: '', material_preference: '', deadline: '' })
+const form = reactive(emptyForm())
+const files = ref<File[]>([])
+const fileProblem = ref<string | null>(null)
+const today = new Date().toISOString().slice(0, 10)
+
+function addFiles(event: Event) {
+  const input = event.target as HTMLInputElement
+  const picked = Array.from(input.files ?? [])
+  input.value = '' // picking the same file again must fire `change`
+  fileProblem.value = null
+
+  for (const file of picked) {
+    const problem = quoteFileProblem(file)
+    if (problem) { fileProblem.value = problem; continue }
+    if (files.value.length >= QUOTE_MAX_FILES) { fileProblem.value = `You can attach up to ${QUOTE_MAX_FILES} files.`; break }
+    if (!files.value.some(f => f.name === file.name && f.size === file.size)) files.value.push(file)
+  }
+}
+
+function removeFile(index: number) {
+  files.value.splice(index, 1)
+  fileProblem.value = null
+}
 const errors = ref<Record<string, string>>({})
 const generalError = ref<string | null>(null)
 const loading = ref(false)
@@ -28,6 +54,9 @@ function validate() {
   if (form.name.trim().length < 2) e.name = 'Enter your name.'
   if (!isValidPhone(form.phone)) e.phone = 'Use your mobile number, like 01XXXXXXXXX.'
   if (form.description.trim().length < QUOTE_DETAILS_MIN) e.description = `Tell us a little more (at least ${QUOTE_DETAILS_MIN} characters).`
+  if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim())) e.email = 'Enter a valid email, or leave it empty.'
+  if (form.quantity.trim() && !(Number.isInteger(Number(form.quantity)) && Number(form.quantity) >= 1)) e.quantity = 'Enter a whole number, like 10.'
+  if (form.deadline && form.deadline < today) e.deadline = 'The date cannot be in the past.'
   return e
 }
 
@@ -38,18 +67,29 @@ async function submit() {
 
   loading.value = true
   try {
-    const res = await $api<{ quote_number: string }>('/custom-quotes', {
-      method: 'POST',
-      body: { ...form, name: form.name.trim(), phone: normalizePhone(form.phone), description: form.description.trim() },
-    })
+    // Multipart, so files can ride along. Empty optional fields are left out.
+    const body = new FormData()
+    const values: Record<string, string> = { ...form, name: form.name.trim(), phone: normalizePhone(form.phone), description: form.description.trim(), email: form.email.trim(), material_preference: form.material_preference.trim() }
+    for (const [key, value] of Object.entries(values)) if (value !== '') body.append(key, value)
+    for (const file of files.value) body.append('files[]', file)
+
+    const res = await $api<{ quote_number: string }>('/custom-quotes', { method: 'POST', body })
     sent.value = { number: res.quote_number, name: form.name.trim() }
-    Object.assign(form, { service_type: '', name: '', phone: '', description: '' })
+    Object.assign(form, emptyForm())
+    files.value = []
+    fileProblem.value = null
     await nextTick()
     document.getElementById('quote-sent')?.focus()
   }
   catch (e) {
     const err = toApiError(e)
-    if (err.status === 422) for (const [k, v] of Object.entries(err.errors)) errors.value[k] = v[0]!
+    if (err.status === 422) {
+      for (const [k, v] of Object.entries(err.errors)) {
+        // `files.0` etc. belong to the file picker.
+        if (k.startsWith('files')) fileProblem.value = v[0]!
+        else errors.value[k] = v[0]!
+      }
+    }
     else generalError.value = err.message
   }
   finally {
@@ -143,18 +183,73 @@ async function submit() {
             </template>
           </UiField>
 
+          <fieldset class="space-y-1">
+            <legend class="mb-2 text-sm font-medium">Files <span class="text-xs font-normal text-muted">(optional)</span></legend>
+            <label
+              for="q-files"
+              class="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-dashed bg-surface-2/50 p-4 text-sm transition focus-within:outline-2 focus-within:outline-accent hover:border-accent"
+              :class="fileProblem ? 'border-danger' : 'border-border'"
+            >
+              <UiIcon name="upload" :size="22" class="shrink-0 text-muted" />
+              <span class="min-w-0 flex-1">
+                <span class="block font-medium">Attach your 3D file or a sketch</span>
+                <span class="block text-xs text-muted">STL, OBJ, 3MF, STEP, PNG, JPG or PDF · up to {{ QUOTE_MAX_FILES }} files, 50 MB each</span>
+              </span>
+              <input id="q-files" type="file" multiple class="sr-only" :accept="QUOTE_FILE_ACCEPT" :disabled="files.length >= QUOTE_MAX_FILES" aria-describedby="q-files-msg" @change="addFiles">
+            </label>
+            <ul v-if="files.length" class="space-y-1.5 pt-1">
+              <li v-for="(f, i) in files" :key="f.name + f.size" class="flex items-center gap-3 rounded-md border border-border bg-surface-2 px-3 py-2 text-sm">
+                <span class="min-w-0 flex-1 truncate">{{ f.name }}</span>
+                <span class="shrink-0 text-xs text-muted">{{ formatFileSize(f.size) }}</span>
+                <button type="button" class="grid size-8 shrink-0 place-items-center rounded-md text-muted transition hover:text-danger" :aria-label="`Remove ${f.name}`" @click="removeFile(i)">
+                  <UiIcon name="close" :size="16" />
+                </button>
+              </li>
+            </ul>
+            <p id="q-files-msg" class="min-h-4 text-xs text-danger" :role="fileProblem ? 'alert' : undefined">{{ fileProblem }}</p>
+          </fieldset>
+
+          <details class="group rounded-md border border-border bg-surface-2/30 open:bg-surface-2/30">
+            <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-medium">
+              <span>More details <span class="text-xs font-normal text-muted">(optional: email, quantity, material, deadline)</span></span>
+              <UiIcon name="chevron-down" :size="16" class="text-muted transition group-open:rotate-180" />
+            </summary>
+            <div class="grid gap-x-4 px-4 pb-2 pt-1 sm:grid-cols-2">
+              <UiField id="q-email" label="Email" :error="errors.email">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" maxlength="150" placeholder="you@example.com" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+              <UiField id="q-qty" label="How many?" :error="errors.quantity">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-qty" v-model="form.quantity" type="number" inputmode="numeric" min="1" max="100000" placeholder="1" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+              <UiField id="q-material" label="Material or colour" :error="errors.material_preference">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-material" v-model="form.material_preference" type="text" maxlength="100" placeholder="e.g. PETG, black" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+              <UiField id="q-deadline" label="Needed by" :error="errors.deadline">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-deadline" v-model="form.deadline" type="date" :min="today" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+            </div>
+          </details>
+
           <p v-if="generalError" class="flex items-start gap-2 rounded-lg border border-danger/50 bg-danger/10 p-3 text-sm text-danger" role="alert">
             <UiIcon name="alert" :size="18" class="mt-0.5" /> {{ generalError }}
           </p>
 
-          <UiButton type="submit" size="lg" block :disabled="loading">{{ loading ? 'Sending…' : 'Send request' }}</UiButton>
+          <UiButton type="submit" size="lg" block :disabled="loading">{{ loading ? (files.length ? 'Uploading…' : 'Sending…') : 'Send request' }}</UiButton>
           <p class="text-center text-xs text-muted">No payment now. We call you first, then confirm the price.</p>
         </form>
       </section>
 
       <aside class="h-fit rounded-xl border border-accent/30 bg-accent/5 p-5">
         <h2 class="text-lg font-semibold">Prefer to talk now?</h2>
-        <p class="mt-1 text-sm text-muted">Reach us directly — we usually reply within a few hours. Have an STL file? Send it on Facebook or email.</p>
+        <p class="mt-1 text-sm text-muted">Reach us directly — we usually reply within a few hours. Have a big file? Send it on Facebook or email.</p>
         <div class="mt-4 flex flex-col gap-2">
           <UiButton :href="phoneHref" variant="secondary" block>
             <UiIcon name="phone" :size="18" /> {{ s?.contact.phone ?? '+880 1812-209019' }}

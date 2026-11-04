@@ -6,7 +6,8 @@ const modelValue = defineModel<number>({ required: true })
 
 type Attr = 'material' | 'color' | 'size'
 const ATTRS: Attr[] = ['material', 'color', 'size']
-const TITLES: Record<Attr, string> = { material: 'Material', color: 'Color', size: 'Size' }
+const { t } = useLocale()
+const TITLES = computed<Record<Attr, string>>(() => ({ material: t('filter.material'), color: t('filter.color'), size: t('product.size') }))
 
 const current = computed(() => props.variants.find(v => v.id === modelValue.value) ?? props.variants[0]!)
 

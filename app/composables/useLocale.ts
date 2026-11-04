@@ -3,6 +3,9 @@ import { en, type MessageKey } from '~/locales/en'
 
 export type Locale = 'en' | 'bn'
 
+/** What `useLocale().t` is: pass it to plain functions (validation, formatting) that cannot call composables themselves. */
+export type Translate = (key: MessageKey, params?: Record<string, string | number>) => string
+
 /** Keys that have `.one` and `.other` forms, e.g. `cart.labelCount`. */
 type PluralKey = Extract<MessageKey, `${string}.one`> extends `${infer Base}.one` ? Base : never
 

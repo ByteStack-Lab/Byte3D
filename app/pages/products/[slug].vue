@@ -4,6 +4,7 @@ import type { ProductDetail } from '~/types/api'
 const route = useRoute()
 const slug = computed(() => String(route.params.slug))
 const abs = useAbsoluteUrl()
+const { t } = useLocale()
 
 const { data } = await useApi<{ data: ProductDetail }>(() => `/products/${slug.value}`, { key: `product-${slug.value}` })
 if (!data.value) {
@@ -35,7 +36,7 @@ onBeforeUnmount(() => clearTimeout(addedTimer))
 // A new product or a different variant starts from a clean form.
 watch(slug, () => { custom.value = {}; quantity.value = 1; showErrors.value = false; justAdded.value = false })
 
-const customErrors = computed(() => validateCustomization(product.value.customization_schema, custom.value))
+const customErrors = computed(() => validateCustomization(product.value.customization_schema, custom.value, t))
 const extras = computed(() => customizationExtras(product.value.customization_schema, custom.value))
 /** Display only; the cart page shows the server's price. */
 const unitPrice = computed(() => variant.value.price + extras.value)
@@ -60,7 +61,7 @@ function addToCart(): boolean {
     unitPrice: unitPrice.value,
     quantity: quantity.value,
     customization: clean,
-    customizationLabels: describeCustomization(product.value.customization_schema, clean),
+    customizationLabels: describeCustomization(product.value.customization_schema, clean, t),
   })
   track('AddToCart', { name: product.value.name, ids: [variant.value.sku], value: unitPrice.value * quantity.value, quantity: quantity.value })
   justAdded.value = true
@@ -80,10 +81,10 @@ const previewText = computed(() => {
 
 const stock = computed(() => {
   const v = variant.value
-  if (!v.in_stock) return { label: 'Out of stock', tone: 'text-danger', dot: 'bg-danger' }
-  if (v.stock === null) return { label: 'Made to order', tone: 'text-accent-2', dot: 'bg-accent-2' }
-  if (v.stock <= 5) return { label: `Only ${v.stock} left`, tone: 'text-accent', dot: 'bg-accent' }
-  return { label: 'In stock', tone: 'text-success', dot: 'bg-success' }
+  if (!v.in_stock) return { label: t('product.outOfStock'), tone: 'text-danger', dot: 'bg-danger' }
+  if (v.stock === null) return { label: t('product.madeToOrder'), tone: 'text-accent-2', dot: 'bg-accent-2' }
+  if (v.stock <= 5) return { label: t('product.onlyLeft', { n: v.stock }), tone: 'text-accent', dot: 'bg-accent' }
+  return { label: t('product.inStock'), tone: 'text-success', dot: 'bg-success' }
 })
 
 const salePercent = computed(() => discountPercent(variant.value.price, variant.value.compare_at_price))
@@ -91,7 +92,7 @@ const days = computed(() => product.value.production_days)
 const readyText = computed(() => {
   const d = days.value
   if (!d) return null
-  return d.min === d.max ? `Ready in ${d.min} days` : `Ready in ${d.min}–${d.max} days`
+  return d.min === d.max ? t('product.readyIn', { n: d.min }) : t('product.readyInRange', { min: d.min, max: d.max })
 })
 
 const fb = computed(() => settings.value?.data.socials.facebook ?? 'https://facebook.com/Byte3D')
@@ -99,11 +100,11 @@ const phone = computed(() => settings.value?.data.contact.phone ?? '+880 1812-20
 const tel = computed(() => `tel:${phone.value.replace(/[^+\d]/g, '')}`)
 
 const specs = computed(() => [
-  product.value.dimensions && { label: 'Dimensions', value: product.value.dimensions },
-  variant.value.material && { label: 'Material', value: variant.value.material },
-  variant.value.color && { label: 'Color', value: variant.value.color },
-  variant.value.size && { label: 'Size', value: variant.value.size },
-  { label: 'SKU', value: variant.value.sku },
+  product.value.dimensions && { label: t('product.dimensions'), value: product.value.dimensions },
+  variant.value.material && { label: t('filter.material'), value: variant.value.material },
+  variant.value.color && { label: t('filter.color'), value: variant.value.color },
+  variant.value.size && { label: t('product.size'), value: variant.value.size },
+  { label: t('product.sku'), value: variant.value.sku },
 ].filter(Boolean) as { label: string, value: string }[])
 
 useSeoMeta({
@@ -149,7 +150,7 @@ useHead(() => {
   <div v-if="data" class="container-page py-6 sm:py-10">
     <UiBreadcrumbs
       :items="[
-        { label: 'Home', to: '/' },
+        { label: t('nav.home'), to: '/' },
         { label: product.category.name, to: `/categories/${product.category.slug}` },
         { label: product.name },
       ]"
@@ -173,12 +174,12 @@ useHead(() => {
 
         <div class="mt-3 flex flex-wrap items-center gap-2">
           <UiBadge v-if="salePercent" variant="sale">−{{ salePercent }}%</UiBadge>
-          <UiBadge v-if="product.badges.includes('new')" variant="new">New</UiBadge>
-          <UiBadge v-if="product.is_customizable" variant="customizable">Customizable</UiBadge>
+          <UiBadge v-if="product.badges.includes('new')" variant="new">{{ t('product.badgeNew') }}</UiBadge>
+          <UiBadge v-if="product.is_customizable" variant="customizable">{{ t('product.badgeCustomizable') }}</UiBadge>
         </div>
 
         <UiPrice class="mt-5" size="lg" :price="unitPrice" :compare-at="extras ? null : variant.compare_at_price" />
-        <p v-if="extras" class="mt-1 text-xs text-muted">Includes {{ formatTaka(extras) }} for your customization.</p>
+        <p v-if="extras" class="mt-1 text-xs text-muted">{{ t('product.includes', { price: formatTaka(extras) }) }}</p>
         <p class="mt-2 flex items-center gap-2 text-sm font-medium" :class="stock.tone" aria-live="polite">
           <span class="size-2 rounded-full" :class="stock.dot" /> {{ stock.label }}
         </p>
@@ -191,16 +192,16 @@ useHead(() => {
         </div>
 
         <p v-if="readyText" class="mt-6 flex items-center gap-2 text-sm text-muted">
-          <UiIcon name="clock" :size="18" class="text-accent" /> {{ readyText }} <span aria-hidden="true">·</span> then delivered across Bangladesh
+          <UiIcon name="clock" :size="18" class="text-accent" /> {{ readyText }} <span aria-hidden="true">·</span> {{ t('product.thenDelivered') }}
         </p>
 
         <div class="mt-6 rounded-lg border border-border bg-surface p-4 sm:p-5">
           <div class="flex items-center gap-4">
-            <div class="flex items-center rounded-md border border-border bg-surface-2" role="group" aria-label="Quantity">
+            <div class="flex items-center rounded-md border border-border bg-surface-2" role="group" :aria-label="t('product.quantity')">
               <button
                 type="button"
                 class="grid size-11 place-items-center rounded-l-md text-muted transition hover:text-text disabled:opacity-40"
-                aria-label="Decrease quantity"
+                :aria-label="t('product.decrease')"
                 :disabled="quantity <= 1"
                 @click="quantity--"
               >
@@ -210,7 +211,7 @@ useHead(() => {
               <button
                 type="button"
                 class="grid size-11 place-items-center rounded-r-md text-muted transition hover:text-text disabled:opacity-40"
-                aria-label="Increase quantity"
+                :aria-label="t('product.increase')"
                 :disabled="quantity >= maxQuantity"
                 @click="quantity++"
               >
@@ -218,35 +219,35 @@ useHead(() => {
               </button>
             </div>
             <p class="text-sm text-muted">
-              Total <strong class="font-display text-lg text-text">{{ formatTaka(unitPrice * quantity) }}</strong>
+              {{ t('product.total') }} <strong class="font-display text-lg text-text">{{ formatTaka(unitPrice * quantity) }}</strong>
             </p>
           </div>
 
           <div class="mt-4 flex flex-col gap-3 sm:flex-row">
             <UiButton size="lg" class="flex-1" :disabled="!variant.in_stock" @click="addToCart">
-              <UiIcon name="cart" :size="18" /> {{ variant.in_stock ? 'Add to cart' : 'Out of stock' }}
+              <UiIcon name="cart" :size="18" /> {{ variant.in_stock ? t('product.addToCart') : t('product.outOfStock') }}
             </UiButton>
             <UiButton variant="secondary" size="lg" class="flex-1" :disabled="!variant.in_stock" @click="buyNow">
-              Buy now
+              {{ t('product.buyNow') }}
             </UiButton>
           </div>
 
           <p v-if="justAdded" class="mt-3 flex items-center gap-2 text-sm font-medium text-success" role="status">
-            <UiIcon name="check" :size="16" /> Added to your cart.
-            <NuxtLink to="/cart" class="underline hover:text-accent">View cart</NuxtLink>
+            <UiIcon name="check" :size="16" /> {{ t('product.addedMessage') }}
+            <NuxtLink to="/cart" class="underline hover:text-accent">{{ t('product.viewCart') }}</NuxtLink>
           </p>
           <p v-else-if="showErrors && Object.keys(customErrors).length" class="mt-3 flex items-center gap-2 text-sm text-danger" role="alert">
-            <UiIcon name="alert" :size="16" /> Please finish the details above first.
+            <UiIcon name="alert" :size="16" /> {{ t('product.finishDetails') }}
           </p>
 
           <ul class="mt-4 grid gap-2 border-t border-border pt-4 text-sm text-muted sm:grid-cols-2">
-            <li class="flex items-center gap-2"><UiIcon name="wallet" :size="16" class="text-accent" /> Cash on delivery</li>
-            <li class="flex items-center gap-2"><UiIcon name="truck" :size="16" class="text-accent" /> Delivery across Bangladesh</li>
+            <li class="flex items-center gap-2"><UiIcon name="wallet" :size="16" class="text-accent" /> {{ t('footer.cod') }}</li>
+            <li class="flex items-center gap-2"><UiIcon name="truck" :size="16" class="text-accent" /> {{ t('footer.delivery') }}</li>
           </ul>
           <p class="mt-3 text-xs text-muted">
-            Prefer to chat?
-            <a :href="fb" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-2 hover:underline">Order on Facebook</a>
-            or <a :href="tel" class="font-medium text-accent-2 hover:underline">call {{ phone }}</a>.
+            {{ t('product.preferChat') }}
+            <a :href="fb" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-2 hover:underline">{{ t('product.orderFacebook') }}</a>
+            {{ t('product.or') }} <a :href="tel" class="font-medium text-accent-2 hover:underline">{{ t('product.callPhone', { phone }) }}</a>.
           </p>
         </div>
 
@@ -260,13 +261,13 @@ useHead(() => {
     </div>
 
     <section class="mt-14 max-w-3xl" aria-labelledby="desc-heading">
-      <h2 id="desc-heading" class="text-xl font-bold sm:text-2xl">About this product</h2>
+      <h2 id="desc-heading" class="text-xl font-bold sm:text-2xl">{{ t('product.about') }}</h2>
       <!-- eslint-disable-next-line vue/no-v-html -- trusted HTML authored by admins in Filament -->
       <div class="description mt-4 space-y-4 leading-relaxed text-muted" v-html="product.description_html" />
     </section>
 
     <section v-if="product.related.length" class="mt-16" aria-labelledby="related-heading">
-      <h2 id="related-heading" class="text-xl font-bold sm:text-2xl">You may also like</h2>
+      <h2 id="related-heading" class="text-xl font-bold sm:text-2xl">{{ t('product.related') }}</h2>
       <ul class="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">
         <li v-for="p in product.related" :key="p.id"><ProductCard :product="p" /></li>
       </ul>
@@ -280,7 +281,7 @@ useHead(() => {
           <p class="font-display text-lg font-bold text-accent">{{ formatTaka(unitPrice * quantity) }}</p>
         </div>
         <UiButton :disabled="!variant.in_stock" @click="addToCart">
-          <UiIcon name="cart" :size="18" /> {{ justAdded ? 'Added' : 'Add to cart' }}
+          <UiIcon name="cart" :size="18" /> {{ justAdded ? t('product.added') : t('product.addToCart') }}
         </UiButton>
       </div>
     </div>

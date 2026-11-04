@@ -9,8 +9,9 @@ const props = defineProps<{
 }>()
 const values = defineModel<Record<string, string>>({ required: true })
 
+const { t } = useLocale()
 const touched = reactive<Record<string, boolean>>({})
-const errors = computed(() => validateCustomization(props.schema, values.value))
+const errors = computed(() => validateCustomization(props.schema, values.value, t))
 
 function error(f: CustomizationField): string | null {
   return props.showErrors || touched[f.key] ? (errors.value[f.key] ?? null) : null
@@ -43,11 +44,11 @@ async function pickImage(f: CustomizationField, event: Event) {
   if (previous) URL.revokeObjectURL(previous)
 
   if (!IMAGE_ACCEPT.split(',').includes(file.type)) {
-    images[f.key] = { name: file.name, preview: null, busy: false, problem: 'Upload a PNG, JPG or WebP image.' }
+    images[f.key] = { name: file.name, preview: null, busy: false, problem: t('custom.badType') }
     return
   }
   if (file.size > IMAGE_MAX_BYTES) {
-    images[f.key] = { name: file.name, preview: null, busy: false, problem: 'The image must be 5 MB or smaller.' }
+    images[f.key] = { name: file.name, preview: null, busy: false, problem: t('custom.tooBig') }
     return
   }
 
@@ -76,7 +77,7 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
 <template>
   <fieldset class="space-y-5 rounded-lg border border-border bg-surface p-4 sm:p-5">
     <legend class="-ml-1 flex items-center gap-2 px-1 text-sm font-semibold">
-      <UiIcon name="sparkle" :size="16" class="text-accent" /> Make it yours
+      <UiIcon name="sparkle" :size="16" class="text-accent" /> {{ t('custom.title') }}
     </legend>
 
     <div v-for="f in schema" :key="f.key">
@@ -84,7 +85,7 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
         <label :for="`cf-${f.key}`" class="text-sm font-medium">
           {{ f.label }}
           <span v-if="f.required" class="text-accent" aria-hidden="true">*</span>
-          <span v-else class="text-xs font-normal text-muted">(optional)</span>
+          <span v-else class="text-xs font-normal text-muted">{{ t('common.optional') }}</span>
         </label>
         <span v-if="f.extra_price" class="shrink-0 text-xs font-semibold text-accent-2">+{{ formatTaka(f.extra_price) }}</span>
       </div>
@@ -99,7 +100,7 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
           :aria-invalid="!!error(f)"
           :aria-describedby="`cf-${f.key}-hint`"
           autocomplete="off"
-          :placeholder="f.required ? 'Type here' : 'Optional'"
+          :placeholder="f.required ? t('custom.typeHere') : t('custom.optional')"
           :class="[input, error(f) ? 'border-danger' : 'border-border focus:border-accent']"
           @input="set(f.key, ($event.target as HTMLInputElement).value)"
           @blur="touched[f.key] = true"
@@ -126,7 +127,7 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
           @blur="touched[f.key] = true"
         >
         <p :id="`cf-${f.key}-hint`" class="mt-1 text-xs" :class="error(f) ? 'text-danger' : 'text-muted'">
-          {{ error(f) ?? 'The page your NFC chip will open when tapped.' }}
+          {{ error(f) ?? t('custom.urlHint') }}
         </p>
       </template>
 
@@ -137,18 +138,18 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
           <div class="min-w-0 flex-1 text-sm">
             <template v-if="images[f.key] && !images[f.key]!.problem">
               <p class="truncate font-medium">{{ images[f.key]!.name }}</p>
-              <p class="text-xs text-muted" aria-live="polite">{{ images[f.key]!.busy ? 'Uploading…' : 'Image attached' }}</p>
+              <p class="text-xs text-muted" aria-live="polite">{{ images[f.key]!.busy ? t('custom.uploading') : t('custom.imageAttached') }}</p>
             </template>
             <template v-else-if="values[f.key]">
-              <p class="font-medium">Image attached</p>
+              <p class="font-medium">{{ t('custom.imageAttached') }}</p>
             </template>
-            <p v-else class="text-muted">PNG, JPG or WebP, up to 5 MB</p>
+            <p v-else class="text-muted">{{ t('custom.imageRules') }}</p>
           </div>
           <label
             :for="`cf-${f.key}`"
             class="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-md border border-border bg-surface px-3 text-sm font-semibold transition hover:border-accent hover:text-accent focus-within:outline-2 focus-within:outline-accent"
           >
-            {{ values[f.key] || images[f.key] ? 'Change' : 'Choose image' }}
+            {{ values[f.key] || images[f.key] ? t('custom.change') : t('custom.choose') }}
             <input
               :id="`cf-${f.key}`" type="file" class="sr-only" :accept="IMAGE_ACCEPT" :aria-invalid="!!(images[f.key]?.problem || error(f))"
               :aria-describedby="`cf-${f.key}-hint`" :disabled="images[f.key]?.busy" @change="pickImage(f, $event)"
@@ -156,13 +157,13 @@ const input = 'h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeho
           </label>
           <button
             v-if="values[f.key] || images[f.key]" type="button" class="grid size-10 shrink-0 place-items-center rounded-md text-muted transition hover:text-danger"
-            :aria-label="`Remove ${f.label}`" @click="dropImage(f.key)"
+            :aria-label="t('custom.remove', { label: f.label })" @click="dropImage(f.key)"
           >
             <UiIcon name="trash" :size="18" />
           </button>
         </div>
         <p :id="`cf-${f.key}-hint`" class="mt-1 text-xs" :class="images[f.key]?.problem || error(f) ? 'text-danger' : 'text-muted'" :role="images[f.key]?.problem ? 'alert' : undefined">
-          {{ images[f.key]?.problem ?? error(f) ?? 'Use a clear, high-contrast image. We will check it before engraving.' }}
+          {{ images[f.key]?.problem ?? error(f) ?? t('custom.imageHint') }}
         </p>
       </template>
     </div>

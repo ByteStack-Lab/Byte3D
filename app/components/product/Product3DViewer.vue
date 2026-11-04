@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useLocale()
 defineProps<{ src: string, alt: string, poster?: string }>()
 
 const ready = ref(false)
@@ -26,7 +27,7 @@ onMounted(async () => {
       style="width: 100%; height: 100%; background: transparent; --poster-color: transparent"
     />
     <p class="pointer-events-none absolute bottom-3 left-3 rounded-full bg-bg/70 px-3 py-1 text-xs text-muted backdrop-blur">
-      Drag to rotate · pinch to zoom
+      {{ t('gallery.dragHint') }}
     </p>
   </div>
 </template>

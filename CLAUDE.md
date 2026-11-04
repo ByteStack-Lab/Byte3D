@@ -23,11 +23,9 @@ npm run typecheck    # nuxt typecheck
 ```
 Run `npm run lint && npm run typecheck` before finishing any task.
 
-## Mock API (until the backend exists)
-`server/routes/mock-api/v1/[...path].ts` serves contract-shaped JSON (data in `server/utils/mock-data.ts`),
-so the frontend runs with no backend. `NUXT_PUBLIC_API_BASE=/mock-api/v1` is the default; point it at
-`http://localhost:8000/api/v1` to use the real API — no component changes needed. The mock must keep
-matching `../CLAUDE.md`; delete it once the backend is live.
+## API
+The storefront talks to the Laravel backend only (`NUXT_PUBLIC_API_BASE`, default `http://localhost:8000/api/v1`).
+The Nitro mock API was removed once backend phase 1 went live; start the backend (`php artisan serve`) before `npm run dev`.
 
 ## Config
 - `runtimeConfig.public.apiBase` ← `NUXT_PUBLIC_API_BASE` (dev: `http://localhost:8000/api/v1`)

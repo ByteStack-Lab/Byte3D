@@ -15,8 +15,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // Default is the built-in mock API. Real API: http://localhost:8000/api/v1
-      apiBase: '/mock-api/v1',
+      apiBase: 'http://localhost:8000/api/v1',
       siteUrl: 'http://localhost:3000',
     },
   },

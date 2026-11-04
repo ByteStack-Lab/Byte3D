@@ -2,6 +2,7 @@
 /** "Pay now" for an unpaid online order: asks the server for a fresh gateway session and sends the shopper there. */
 const props = defineProps<{ orderNumber: string, phone?: string }>()
 
+const { t } = useLocale()
 const askedPhone = ref('')
 const error = ref<string | null>(null)
 const busy = ref(false)
@@ -11,7 +12,7 @@ async function pay() {
   error.value = null
   const phone = knownPhone.value || askedPhone.value
   if (!isValidPhone(phone)) {
-    error.value = 'Enter the mobile number you ordered with, like 01XXXXXXXXX.'
+    error.value = t('pay.errPhone')
     return
   }
   busy.value = true
@@ -32,10 +33,10 @@ async function pay() {
 <template>
   <div class="space-y-3">
     <div v-if="!knownPhone">
-      <label for="pay-phone" class="mb-1.5 block text-left text-sm font-medium">Your mobile number</label>
+      <label for="pay-phone" class="mb-1.5 block text-left text-sm font-medium">{{ t('pay.yourMobile') }}</label>
       <input id="pay-phone" v-model="askedPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX" :class="inputClass(!!error)" :aria-invalid="!!error">
     </div>
-    <UiButton size="lg" block :disabled="busy" @click="pay">{{ busy ? 'Opening payment…' : 'Pay now' }}</UiButton>
+    <UiButton size="lg" block :disabled="busy" @click="pay">{{ busy ? t('pay.opening') : t('pay.now') }}</UiButton>
     <p v-if="error" class="text-left text-sm text-danger" role="alert">{{ error }}</p>
   </div>
 </template>

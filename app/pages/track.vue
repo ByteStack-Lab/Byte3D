@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { Order } from '~/types/api'
+import type { MessageKey } from '~/locales/en'
 
+const { t, locale } = useLocale()
 useSeoMeta({
-  title: 'Track your order',
-  description: 'Check where your Byte3D order is with your order number and phone number.',
+  title: () => t('track.seoTitle'),
+  description: () => t('track.seoDescription'),
   robots: 'noindex',
 })
 
@@ -33,8 +35,8 @@ async function submit() {
   generalError.value = null
   order.value = null
 
-  if (!form.order_number.trim()) errors.value.order_number = 'Enter your order number, like B3D-260001.'
-  if (!isValidPhone(form.phone)) errors.value.phone = 'Use the mobile number you ordered with, like 01XXXXXXXXX.'
+  if (!form.order_number.trim()) errors.value.order_number = t('track.errOrder')
+  if (!isValidPhone(form.phone)) errors.value.phone = t('track.errPhone')
   if (Object.keys(errors.value).length) return
 
   loading.value = true
@@ -59,11 +61,11 @@ async function submit() {
 <template>
   <div class="container-page py-8 sm:py-12">
     <div class="mx-auto max-w-2xl">
-      <h1 class="text-3xl font-bold sm:text-4xl">Track your order</h1>
-      <p class="mt-2 text-muted">Enter the order number from your confirmation and the phone number you ordered with.</p>
+      <h1 class="text-3xl font-bold sm:text-4xl">{{ t('track.seoTitle') }}</h1>
+      <p class="mt-2 text-muted">{{ t('track.intro') }}</p>
 
       <form class="mt-6 space-y-4 rounded-lg border border-border bg-surface p-5" novalidate @submit.prevent="submit">
-        <UiField id="t-order" label="Order number" required :error="errors.order_number">
+        <UiField id="t-order" :label="t('order.number')" required :error="errors.order_number">
           <template #default="{ invalid, describedBy }">
             <input
               id="t-order" v-model="form.order_number" type="text" autocomplete="off" autocapitalize="characters" placeholder="B3D-260001"
@@ -71,7 +73,7 @@ async function submit() {
             >
           </template>
         </UiField>
-        <UiField id="t-phone" label="Phone number" required :error="errors.phone">
+        <UiField id="t-phone" :label="t('track.phone')" required :error="errors.phone">
           <template #default="{ invalid, describedBy }">
             <input
               id="t-phone" v-model="form.phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"
@@ -79,12 +81,12 @@ async function submit() {
             >
           </template>
         </UiField>
-        <UiButton type="submit" size="lg" block :disabled="loading">{{ loading ? 'Looking…' : 'Track order' }}</UiButton>
+        <UiButton type="submit" size="lg" block :disabled="loading">{{ loading ? t('track.looking') : t('nav.track') }}</UiButton>
       </form>
 
       <p v-if="notFound" class="mt-6 flex items-start gap-2 rounded-lg border border-border bg-surface p-4 text-sm" role="alert">
         <UiIcon name="info" :size="18" class="mt-0.5 text-accent-2" />
-        We could not find an order with that number and phone. Please check both and try again.
+        {{ t('track.notFound') }}
       </p>
       <p v-else-if="generalError" class="mt-6 flex items-start gap-2 rounded-lg border border-danger/50 bg-danger/10 p-4 text-sm text-danger" role="alert">
         <UiIcon name="alert" :size="18" class="mt-0.5" /> {{ generalError }}
@@ -96,16 +98,16 @@ async function submit() {
           v-if="order.payment_method !== 'cod' && order.payment_status !== 'paid' && order.payment_status !== 'refunded' && order.status !== 'cancelled' && order.status !== 'returned'"
           class="mt-4 rounded-lg border border-warning/40 bg-warning/10 p-4"
         >
-          <p class="mb-3 text-sm font-medium">This order is not paid yet.</p>
+          <p class="mb-3 text-sm font-medium">{{ t('track.notPaid') }}</p>
           <AccountOrderPayNow :order-number="order.order_number" :phone="form.phone" />
         </div>
         <section v-if="order.timeline.length" class="mt-6" aria-labelledby="timeline-heading">
-          <h2 id="timeline-heading" class="text-lg font-bold">History</h2>
+          <h2 id="timeline-heading" class="text-lg font-bold">{{ t('track.history') }}</h2>
           <ol class="mt-3 space-y-3 border-l border-border pl-5">
-            <li v-for="(t, i) in [...order.timeline].reverse()" :key="i" class="relative text-sm">
+            <li v-for="(entry, i) in [...order.timeline].reverse()" :key="i" class="relative text-sm">
               <span class="absolute -left-[1.6rem] top-1.5 size-2.5 rounded-full" :class="i === 0 ? 'bg-accent' : 'bg-border'" />
-              <p class="font-medium">{{ t.label }}</p>
-              <p class="text-xs text-muted">{{ formatDate(t.at) }}</p>
+              <p class="font-medium">{{ t(`status.${entry.status}` as MessageKey) }}</p>
+              <p class="text-xs text-muted">{{ formatDate(entry.at, locale) }}</p>
             </li>
           </ol>
         </section>

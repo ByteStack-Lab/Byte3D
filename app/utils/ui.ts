@@ -12,22 +12,17 @@ export const PAYMENT_KEYS: Record<PaymentMethod, MessageKey> = {
   bkash: 'pay.bkash',
 }
 
-export const PAYMENT_LABELS: Record<PaymentMethod, string> = {
-  cod: 'Cash on delivery',
-  sslcommerz: 'Card / mobile banking',
-  bkash: 'bKash',
-}
 
 /** The happy path, in order. Cancelled and returned orders sit outside it. */
-export const ORDER_STEPS: { status: OrderStatus, label: string }[] = [
-  { status: 'pending', label: 'Order placed' },
-  { status: 'confirmed', label: 'Confirmed' },
-  { status: 'in_production', label: 'In production' },
-  { status: 'ready_to_ship', label: 'Ready to ship' },
-  { status: 'shipped', label: 'Shipped' },
-  { status: 'delivered', label: 'Delivered' },
+export const ORDER_STEPS: { status: OrderStatus, key: MessageKey }[] = [
+  { status: 'pending', key: 'step.pending' },
+  { status: 'confirmed', key: 'step.confirmed' },
+  { status: 'in_production', key: 'step.in_production' },
+  { status: 'ready_to_ship', key: 'step.ready_to_ship' },
+  { status: 'shipped', key: 'step.shipped' },
+  { status: 'delivered', key: 'step.delivered' },
 ]
 
-export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+export function formatDate(iso: string, locale: 'en' | 'bn' = 'en'): string {
+  return new Date(iso).toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }

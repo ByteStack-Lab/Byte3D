@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Order } from '~/types/api'
+import type { MessageKey } from '~/locales/en'
 
 const props = defineProps<{ order: Order }>()
+const { t, locale } = useLocale()
 
 /** name_text → "Name text" (orders do not carry the product's field labels). */
 const humanize = (key: string) => key.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase())
@@ -15,29 +17,29 @@ const stopped = computed(() => props.order.status === 'cancelled' || props.order
     <header class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h3 class="font-display text-lg font-bold tracking-wide">{{ order.order_number }}</h3>
-        <p class="text-sm text-muted">Placed {{ formatDate(order.placed_at) }}</p>
+        <p class="text-sm text-muted">{{ t('order.placed', { date: formatDate(order.placed_at, locale) }) }}</p>
       </div>
       <p
         class="rounded-full px-3 py-1 text-xs font-semibold"
         :class="stopped ? 'bg-danger/15 text-danger' : order.status === 'delivered' ? 'bg-success/15 text-success' : 'bg-accent/15 text-accent'"
       >
-        {{ order.status_label }}
+        {{ t(`status.${order.status}` as MessageKey) }}
       </p>
     </header>
 
-    <ol v-if="!stopped" class="mt-5 grid grid-cols-6 gap-1" aria-label="Order progress">
+    <ol v-if="!stopped" class="mt-5 grid grid-cols-6 gap-1" :aria-label="t('order.progress')">
       <li v-for="(step, i) in ORDER_STEPS" :key="step.status" class="min-w-0">
         <span class="block h-1.5 rounded-full" :class="i <= stepIndex ? 'bg-accent' : 'bg-surface-2'" />
-        <span class="mt-1.5 block truncate text-[11px] leading-tight sm:text-xs" :class="i === stepIndex ? 'font-semibold text-text' : 'text-muted'">{{ step.label }}</span>
+        <span class="mt-1.5 block truncate text-[11px] leading-tight sm:text-xs" :class="i === stepIndex ? 'font-semibold text-text' : 'text-muted'">{{ t(step.key) }}</span>
       </li>
     </ol>
-    <p v-else class="mt-4 rounded-md bg-danger/10 p-3 text-sm text-danger">This order was {{ order.status === 'cancelled' ? 'cancelled' : 'returned' }}.</p>
+    <p v-else class="mt-4 rounded-md bg-danger/10 p-3 text-sm text-danger">{{ t(order.status === 'cancelled' ? 'order.wasCancelled' : 'order.wasReturned') }}</p>
 
     <p v-if="order.shipment" class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-surface-2 p-3 text-sm">
       <UiIcon name="truck" :size="16" class="text-accent" />
-      <span>With <strong>{{ order.shipment.courier }}</strong></span>
-      <span v-if="order.shipment.tracking_code" class="text-muted">· Tracking code <span class="font-medium text-text">{{ order.shipment.tracking_code }}</span></span>
-      <a v-if="order.shipment.tracking_url" :href="order.shipment.tracking_url" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-2 hover:underline">Track parcel</a>
+      <span>{{ t('order.withCourier', { courier: order.shipment.courier }) }}</span>
+      <span v-if="order.shipment.tracking_code" class="text-muted">· {{ t('order.trackingCode') }} <span class="font-medium text-text">{{ order.shipment.tracking_code }}</span></span>
+      <a v-if="order.shipment.tracking_url" :href="order.shipment.tracking_url" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-2 hover:underline">{{ t('order.trackParcel') }}</a>
     </p>
 
     <ul class="mt-5 divide-y divide-border border-t border-border text-sm">
@@ -52,13 +54,13 @@ const stopped = computed(() => props.order.status === 'cancelled' || props.order
     </ul>
 
     <dl class="space-y-1.5 border-t border-border pt-4 text-sm">
-      <div class="flex justify-between"><dt class="text-muted">Subtotal</dt><dd class="tabular-nums">{{ formatTaka(order.subtotal) }}</dd></div>
-      <div v-if="order.discount" class="flex justify-between text-success"><dt>Discount</dt><dd class="tabular-nums">−{{ formatTaka(order.discount) }}</dd></div>
-      <div class="flex justify-between"><dt class="text-muted">Shipping</dt><dd class="tabular-nums">{{ formatTaka(order.shipping_fee) }}</dd></div>
-      <div class="flex justify-between text-base font-bold"><dt>Total</dt><dd class="font-display tabular-nums">{{ formatTaka(order.total) }}</dd></div>
+      <div class="flex justify-between"><dt class="text-muted">{{ t('cart.subtotal') }}</dt><dd class="tabular-nums">{{ formatTaka(order.subtotal) }}</dd></div>
+      <div v-if="order.discount" class="flex justify-between text-success"><dt>{{ t('cart.discount') }}</dt><dd class="tabular-nums">−{{ formatTaka(order.discount) }}</dd></div>
+      <div class="flex justify-between"><dt class="text-muted">{{ t('cart.shipping') }}</dt><dd class="tabular-nums">{{ formatTaka(order.shipping_fee) }}</dd></div>
+      <div class="flex justify-between text-base font-bold"><dt>{{ t('cart.total') }}</dt><dd class="font-display tabular-nums">{{ formatTaka(order.total) }}</dd></div>
       <div class="flex justify-between text-xs text-muted">
-        <dt>Payment</dt>
-        <dd>{{ PAYMENT_LABELS[order.payment_method] }} · {{ order.payment_status }}</dd>
+        <dt>{{ t('checkout.payment') }}</dt>
+        <dd>{{ t(PAYMENT_KEYS[order.payment_method]) }} · {{ t(`paystatus.${order.payment_status}` as MessageKey) }}</dd>
       </div>
     </dl>
   </article>

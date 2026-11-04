@@ -66,20 +66,21 @@ public/
 ```
 
 ## Design system
-**Direction: "maker lab"** — dark, technical, with a warm glowing filament accent. It should feel
+**Direction: "maker lab"** — dark, technical, with a glowing blue/indigo accent (palette taken from the ByteStackLab site). It should feel
 like a premium 3D-print studio, not a generic shop template.
 
-Tokens (placeholders until the Byte3D brand kit exists — keep them in `@theme` so they swap in one place):
+Tokens (dark values; placeholders until the Byte3D brand kit exists — keep them in `@theme` so they swap in one place):
 | Token | Value | Use |
 |---|---|---|
-| `--color-bg` | `#0B0D10` | page background |
-| `--color-surface` | `#14171C` | cards |
-| `--color-surface-2` | `#1C2027` | hover, inputs |
-| `--color-border` | `#262B33` | dividers, card borders |
-| `--color-text` | `#F2F4F7` | primary text |
-| `--color-muted` | `#9AA3AF` | secondary text |
-| `--color-accent` | `#FF7A1A` | filament orange — CTAs, glow, prices on sale |
-| `--color-accent-2` | `#22D3EE` | cyan — secondary highlights, links |
+| `--color-bg` | `#0A0C1A` | page background |
+| `--color-surface` | `#11142A` | cards |
+| `--color-surface-2` | `#1A1E3B` | hover, inputs |
+| `--color-border` | `#272C54` | dividers, card borders |
+| `--color-text` | `#F1F2FF` | primary text |
+| `--color-muted` | `#A3A9D0` | secondary text |
+| `--color-accent` | `#6675F7` | periwinkle indigo — CTAs, glow, prices on sale |
+| `--color-on-accent` | `#0A0C1A` | text/icons placed on an accent background (white in light theme) |
+| `--color-accent-2` | `#68DBF2` | cyan — secondary highlights, links |
 | `--color-success` / `--color-danger` | `#22C55E` / `#EF4444` | states |
 
 ### Theme (light / dark)
@@ -93,7 +94,7 @@ Tokens (placeholders until the Byte3D brand kit exists — keep them in `@theme`
   Components must use the tokens (`bg-bg`, `text-muted`, `border-border`, …) — never hard-coded greys/white/black.
 - An inline script in `nuxt.config.ts` sets `data-theme` before first paint (no flash). `useTheme()`
   keeps it in sync; the toggle is `<ClientOnly>` (the saved choice is unknown on the server).
-- Light accent is darker (`#D4540A`) so orange text meets WCAG AA on white; light cyan is `#0E7490`.
+- Light accent is deeper indigo (`#3533CD`) so accent text meets WCAG AA on white, with white `--color-on-accent`; light secondary is `#1D6FB8`.
 - Things that stay dark in both themes on purpose: the hero 3D stage and its poster, product/category
   photos and their overlay text (`text-white`). Badges on top of photos use `<UiBadge overlay>`.
 - Radius 12 / 16 / 24. Container `max-w-7xl`, side gutter 16px on mobile.
@@ -114,7 +115,7 @@ Left column: headline (h1), subheadline, primary CTA "Shop Now" → `/shop`, sec
 The text is SSR HTML and is the LCP element. The canvas must never block LCP.
 
 **Scene** (`HeroPrint3D.client.vue` renders; `usePrintScene.ts` owns the logic):
-- **Print bed** — rounded dark plate with fine grid lines and a faint orange edge glow.
+- **Print bed** — rounded dark plate with fine grid lines and a faint indigo edge glow.
 - **Model** — GLB from `/models/hero.glb`, centered on the bed, scaled to fit. Until a real model
   exists, a procedural placeholder is used (mini robot, mini house, keychain, fidget spinner — currently the only models;
   no GLTFLoader yet, add it with the first real asset). Procedural placeholder (e.g. `LatheGeometry` vase, or an `ExtrudeGeometry` keychain
@@ -123,18 +124,18 @@ The text is SSR HTML and is the LCP element. The canvas must never block LCP.
   `clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, -1, 0), h)]`. Animate `h` from the model's
   bottom to its top over ~6 s, mostly linear like a real print, with gentle ease at start and end.
 - **Hot layer glow** — patch the material with `onBeforeCompile`: uniforms `uCutHeight`, `uBand`,
-  `uGlowColor`; add emissive orange where `abs(worldPos.y - uCutHeight) < uBand`. This sells the
+  `uGlowColor`; add emissive accent-color glow where `abs(worldPos.y - uCutHeight) < uBand`. This sells the
   "freshly extruded" line.
 - **Printed texture** — faint horizontal layer lines on the model (shader stripes every ~0.3–0.4 units).
 - **Print head** — small hotend (cylinder + cone nozzle) sitting just above the cut height, moving in a
-  zigzag raster across the model's XZ bounds each layer. Tiny orange point light at the nozzle tip with
+  zigzag raster across the model's XZ bounds each layer. Tiny indigo point light at the nozzle tip with
   a subtle flicker. Optional thin gantry bars for context.
 - **Loop sequence** — print (~6 s) → head lifts and slides away (~0.8 s) → finished model turntable
   360° with a soft highlight sweep (~4 s) → model dissolves downward (reverse the clip) → next loop.
   Optionally cycle 2–3 models per loop (keychain, figurine, fidget).
 - **Camera** — perspective, 3/4 view. Desktop: slight mouse parallax (lerped, max ±3°).
   Touch devices: no parallax. No OrbitControls in the hero (prevents scroll hijacking).
-- **Lighting & color** — hemisphere light + soft key directional + orange rim light; soft contact
+- **Lighting & color** — hemisphere light + soft key directional + indigo rim light; soft contact
   shadow under the model (blurred radial texture on a plane). `ACESFilmicToneMapping`,
   `SRGBColorSpace` output.
 

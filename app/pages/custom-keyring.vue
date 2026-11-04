@@ -144,7 +144,7 @@ const input = 'h-12 w-full rounded-md border border-border bg-surface-2 px-4 tex
               <div role="radiogroup" aria-label="Product type" class="inline-flex rounded-full border border-border bg-surface-2 p-1">
                 <label v-for="t in KEYRING_TYPES" :key="t.id" class="cursor-pointer">
                   <input v-model="type" type="radio" name="kr-type" :value="t.id" class="peer sr-only">
-                  <span class="block min-h-9 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-muted transition peer-checked:bg-accent peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-accent">{{ t.label }}</span>
+                  <span class="block min-h-9 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-muted transition peer-checked:bg-accent peer-checked:text-on-accent peer-focus-visible:outline-2 peer-focus-visible:outline-accent">{{ t.label }}</span>
                 </label>
               </div>
             </div>
@@ -218,7 +218,7 @@ const input = 'h-12 w-full rounded-md border border-border bg-surface-2 px-4 tex
 :class="`kr-f-${f.id}`" class="block truncate py-1 leading-tight"
                     :style="{ fontSize: f.width > 0.7 ? '1.125rem' : '1.5rem' }">{{ filled[0] || 'Your Name' }}</span>
                   <span class="mt-1.5 block text-xs text-muted">{{ f.label }}</span>
-                  <span class="absolute right-2 top-2 grid size-5 place-items-center rounded-full bg-accent text-black opacity-0 transition group-has-[:checked]:opacity-100">
+                  <span class="absolute right-2 top-2 grid size-5 place-items-center rounded-full bg-accent text-on-accent opacity-0 transition group-has-[:checked]:opacity-100">
                     <UiIcon name="check" :size="12" />
                   </span>
                 </label>

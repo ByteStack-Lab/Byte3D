@@ -40,7 +40,7 @@ const base = 'grid size-11 place-items-center rounded-md border text-sm font-med
           :to="link(p)"
           :aria-label="`Page ${p}`"
           :aria-current-value="p === current ? 'page' : 'false'"
-          :class="[base, p === current ? 'border-accent bg-accent text-black' : 'border-border hover:border-accent hover:text-accent']"
+          :class="[base, p === current ? 'border-accent bg-accent text-on-accent' : 'border-border hover:border-accent hover:text-accent']"
         >
           {{ p }}
         </NuxtLink>

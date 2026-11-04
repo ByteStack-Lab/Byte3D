@@ -71,7 +71,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
   const key = new THREE.DirectionalLight(0xffffff, 2.4)
   key.position.set(4, 8, 5)
   scene.add(key)
-  const rim = new THREE.DirectionalLight(0xff7a1a, 2.2)
+  const rim = new THREE.DirectionalLight(0x6675f7, 2.2)
   rim.position.set(-5, 3, -5)
   scene.add(rim)
 
@@ -134,11 +134,11 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
   grid.position.y = 0.002
   bed.add(grid)
 
-  // faint orange edge
+  // faint indigo edge
   const edgePts = roundedRect(BED - 0.12, BED - 0.12, 0.5).getPoints(12).map(p => new THREE.Vector3(p.x, 0.004, -p.y))
   const edge = new THREE.LineLoop(
     new THREE.BufferGeometry().setFromPoints(edgePts),
-    new THREE.LineBasicMaterial({ color: 0xff7a1a, transparent: true, opacity: 0.75 }),
+    new THREE.LineBasicMaterial({ color: 0x6675f7, transparent: true, opacity: 0.75 }),
   )
   bed.add(edge)
 
@@ -193,7 +193,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
   body.position.y = 0.62
   const block = new THREE.Mesh(
     new THREE.BoxGeometry(0.26, 0.16, 0.26),
-    new THREE.MeshStandardMaterial({ color: 0xff7a1a, roughness: 0.4, metalness: 0.5, emissive: 0xff4400, emissiveIntensity: 0.35 }),
+    new THREE.MeshStandardMaterial({ color: 0x6675f7, roughness: 0.4, metalness: 0.5, emissive: 0x3533cd, emissiveIntensity: 0.35 }),
   )
   block.position.y = 0.32
   const nozzleGeo = new THREE.ConeGeometry(0.09, 0.22, 16)
@@ -210,7 +210,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
   const uniforms = {
     uCut: { value: 0 },
     uBand: { value: 0.14 },
-    uGlow: { value: new THREE.Color(0xff7a1a) },
+    uGlow: { value: new THREE.Color(0x6675f7) },
     uK: { value: 2.2 },
     uLayer: { value: 0.085 },
   }
@@ -254,9 +254,9 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
 
   /** Mini robot: rounded torso and head, capsule arms, antenna. ~2.7 tall, bottom on y = 0. */
   function robot() {
-    const body = makeMaterial(0xff7a1a)
+    const body = makeMaterial(0x6675f7)
     const trim = makeMaterial(0xf2f4f7)
-    const glow = makeMaterial(0x22d3ee)
+    const glow = makeMaterial(0x68dbf2)
     const g = new THREE.Group()
     const put = (geo: ThreeTypes.BufferGeometry, mat: ThreeTypes.Material, x: number, y: number, z: number) => {
       const m = new THREE.Mesh(geo, mat)
@@ -305,9 +305,9 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
   /** Mini house: plinth, walls, gable roof, chimney, door and windows. ~2.7 tall, front faces +z. */
   function house() {
     const wall = makeMaterial(0xf2f4f7)
-    const roofMat = makeMaterial(0xff7a1a)
+    const roofMat = makeMaterial(0x6675f7)
     const brick = makeMaterial(0xc25410)
-    const glass = makeMaterial(0x22d3ee)
+    const glass = makeMaterial(0x68dbf2)
     const g = new THREE.Group()
     const put = (geo: ThreeTypes.BufferGeometry, mat: ThreeTypes.Material, x: number, y: number, z: number) => {
       const m = new THREE.Mesh(geo, mat)
@@ -357,7 +357,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
     hole.absarc(-1.0, 0.45, 0.2, 0, Math.PI * 2, true)
     s.holes.push(hole)
     const geo = new THREE.ExtrudeGeometry(s, { depth: 0.42, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 2, curveSegments: 20 })
-    const mesh = new THREE.Mesh(geo, makeMaterial(0x22d3ee))
+    const mesh = new THREE.Mesh(geo, makeMaterial(0x68dbf2))
     // emboss: three raised bars standing in for text
     const barMat = makeMaterial(0xf2f4f7)
     const bars = new THREE.Group()
@@ -483,7 +483,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
       clipPlane.constant = h
       uniforms.uCut.value = h
       uniforms.uK.value = 2.2
-      uniforms.uGlow.value.setHex(0xff7a1a)
+      uniforms.uGlow.value.setHex(0x6675f7)
       model.rotation.y = 0
       const rx = (info.box.max.x - info.box.min.x) / 2 * 0.9
       const rz = (info.box.max.z - info.box.min.z) / 2 * 0.9
@@ -514,7 +514,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
       const h = H * (1 - smooth(p))
       clipPlane.constant = h
       uniforms.uCut.value = h
-      uniforms.uGlow.value.setHex(0xff7a1a)
+      uniforms.uGlow.value.setHex(0x6675f7)
       uniforms.uK.value = 1.6
       model.rotation.y = 0
       setHead(false)

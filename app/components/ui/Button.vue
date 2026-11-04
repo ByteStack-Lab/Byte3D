@@ -12,7 +12,7 @@ const props = withDefaults(defineProps<{
 const tag = computed(() => (props.to ? resolveComponent('NuxtLink') : props.href ? 'a' : 'button'))
 
 const variants = {
-  primary: 'bg-accent text-black hover:bg-accent-hover shadow-[0_0_0_0_rgb(255_122_26/0)] hover:shadow-[0_8px_28px_-8px_rgb(255_122_26/0.6)]',
+  primary: 'bg-accent text-on-accent hover:bg-accent-hover shadow-[0_0_0_0_rgb(102_117_247/0)] hover:shadow-[0_8px_28px_-8px_rgb(102_117_247/0.6)]',
   secondary: 'border border-border bg-surface-2 text-text hover:border-accent/60 hover:text-accent',
   ghost: 'text-muted hover:text-text hover:bg-surface-2',
 } as const

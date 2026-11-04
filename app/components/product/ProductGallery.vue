@@ -32,10 +32,10 @@ const tabBtn = 'min-h-11 rounded-full px-4 text-sm font-medium transition'
 <template>
   <div>
     <div v-if="modelUrl" class="mb-3 flex gap-2" role="tablist" aria-label="Product media">
-      <button type="button" role="tab" :aria-selected="tab === 'photos'" :class="[tabBtn, tab === 'photos' ? 'bg-accent text-black' : 'bg-surface-2 text-muted hover:text-text']" @click="tab = 'photos'">
+      <button type="button" role="tab" :aria-selected="tab === 'photos'" :class="[tabBtn, tab === 'photos' ? 'bg-accent text-on-accent' : 'bg-surface-2 text-muted hover:text-text']" @click="tab = 'photos'">
         <UiIcon name="image" :size="16" class="mr-1 inline" /> Photos
       </button>
-      <button type="button" role="tab" :aria-selected="tab === '3d'" :class="[tabBtn, tab === '3d' ? 'bg-accent text-black' : 'bg-surface-2 text-muted hover:text-text']" @click="tab = '3d'">
+      <button type="button" role="tab" :aria-selected="tab === '3d'" :class="[tabBtn, tab === '3d' ? 'bg-accent text-on-accent' : 'bg-surface-2 text-muted hover:text-text']" @click="tab = '3d'">
         <UiIcon name="rotate" :size="16" class="mr-1 inline" /> View in 3D
       </button>
     </div>
@@ -79,7 +79,7 @@ const tabBtn = 'min-h-11 rounded-full px-4 text-sm font-medium transition'
         <!-- Live preview of the customer's text on the product (decorative; the field itself is the source of truth). -->
         <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 translate-y-2" leave-active-class="transition duration-150" leave-to-class="opacity-0">
           <div v-if="previewText" class="pointer-events-none absolute inset-x-4 bottom-5 flex flex-col items-center gap-1" aria-hidden="true">
-            <span class="max-w-full truncate rounded-lg bg-bg/70 px-5 py-2 font-display text-2xl font-bold tracking-wide text-accent shadow-[0_0_24px_rgb(255_122_26/0.45)] ring-1 ring-accent/50 backdrop-blur sm:text-3xl">
+            <span class="max-w-full truncate rounded-lg bg-bg/70 px-5 py-2 font-display text-2xl font-bold tracking-wide text-accent shadow-[0_0_24px_rgb(102_117_247/0.45)] ring-1 ring-accent/50 backdrop-blur sm:text-3xl">
               {{ previewText }}
             </span>
             <span class="text-[11px] uppercase tracking-widest text-muted">Live preview</span>

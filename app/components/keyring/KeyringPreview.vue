@@ -125,7 +125,7 @@ const label = computed(() => `Preview of a ${tag.value ? 'bag tag' : 'keyring'} 
     linear-gradient(rgb(20 23 28 / 0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgb(20 23 28 / 0.07) 1px, transparent 1px);
   background-size: auto, 24px 24px, 24px 24px;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 0 60px -28px rgb(255 122 26 / 0.45);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 0 60px -28px rgb(102 117 247 / 0.45);
 }
 .kr-fade { transition: fill 0.2s, stroke 0.2s; }
 

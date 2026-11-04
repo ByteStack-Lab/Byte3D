@@ -3,7 +3,7 @@ const config = useRuntimeConfig()
 const { resolved } = useTheme()
 
 // Browser UI colour (mobile address bar) follows the active theme.
-useHead({ meta: [{ name: 'theme-color', content: () => (resolved.value === 'light' ? '#F7F6F3' : '#0B0D10') }] })
+useHead({ meta: [{ name: 'theme-color', content: () => (resolved.value === 'light' ? '#F6F7FD' : '#0A0C1A') }] })
 
 useHead({
   titleTemplate: title => (title && !title.includes('Byte3D') ? `${title} | Byte3D` : title || 'Byte3D — Custom 3D Printing in Bangladesh'),
@@ -32,7 +32,7 @@ useHead({
 
 <template>
   <NuxtRouteAnnouncer />
-  <NuxtLoadingIndicator color="#FF7A1A" :height="2" />
+  <NuxtLoadingIndicator color="#6675F7" :height="2" />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

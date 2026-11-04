@@ -139,7 +139,7 @@ async function signOut() {
         <button
           v-for="m in (['login', 'register'] as const)" :key="m" type="button" role="tab" :aria-selected="mode === m"
           class="min-h-10 rounded-md text-sm font-semibold transition"
-          :class="mode === m ? 'bg-accent text-black' : 'text-muted hover:text-text'"
+          :class="mode === m ? 'bg-accent text-on-accent' : 'text-muted hover:text-text'"
           @click="setMode(m)"
         >
           {{ m === 'login' ? 'Sign in' : 'Register' }}

@@ -72,7 +72,7 @@ watch(page, () => {
             @click="drawerOpen = true"
           >
             <UiIcon name="filter" :size="18" /> Filter
-            <span v-if="activeCount" class="grid size-5 place-items-center rounded-full bg-accent text-xs font-bold text-black">{{ activeCount }}</span>
+            <span v-if="activeCount" class="grid size-5 place-items-center rounded-full bg-accent text-xs font-bold text-on-accent">{{ activeCount }}</span>
           </button>
           <div class="flex-1 sm:w-52 sm:flex-none">
             <ShopSortSelect :model-value="sort" @update:model-value="v => update({ sort: v === 'newest' ? undefined : v })" />

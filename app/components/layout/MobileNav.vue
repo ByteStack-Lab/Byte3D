@@ -21,11 +21,12 @@ useDialog(panel, open, () => { open.value = false })
     >
       <div v-if="open" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" @click="open = false" />
     </Transition>
+    <!-- Slides in from the left edge and back out the same way. -->
     <Transition
-      enter-active-class="transition duration-250 ease-out"
-      enter-from-class="translate-x-full"
-      leave-active-class="transition duration-200 ease-in"
-      leave-to-class="translate-x-full"
+      enter-active-class="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      enter-from-class="-translate-x-full"
+      leave-active-class="transition-transform duration-200 ease-in"
+      leave-to-class="-translate-x-full"
     >
       <aside
         v-if="open"
@@ -33,7 +34,7 @@ useDialog(panel, open, () => { open.value = false })
         role="dialog"
         aria-modal="true"
         :aria-label="t('nav.menu')"
-        class="fixed inset-y-0 right-0 z-50 flex w-[min(22rem,88vw)] flex-col border-l border-border bg-bg shadow-2xl"
+        class="fixed inset-y-0 left-0 z-50 flex w-[min(22rem,88vw)] flex-col border-r border-border bg-bg shadow-2xl will-change-transform"
       >
         <div class="flex h-16 items-center justify-between border-b border-border px-4">
           <LayoutAppLogo />

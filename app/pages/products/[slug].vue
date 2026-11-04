@@ -18,6 +18,53 @@ watch(slug, () => { variantId.value = defaultId() })
 const variant = computed(() => product.value.variants.find(v => v.id === variantId.value) ?? product.value.variants[0]!)
 
 const custom = ref<Record<string, string>>({})
+const quantity = ref(1)
+const showErrors = ref(false)
+const justAdded = ref(false)
+const cart = useCartStore()
+let addedTimer: ReturnType<typeof setTimeout> | undefined
+onBeforeUnmount(() => clearTimeout(addedTimer))
+
+// A new product or a different variant starts from a clean form.
+watch(slug, () => { custom.value = {}; quantity.value = 1; showErrors.value = false; justAdded.value = false })
+
+const customErrors = computed(() => validateCustomization(product.value.customization_schema, custom.value))
+const extras = computed(() => customizationExtras(product.value.customization_schema, custom.value))
+/** Display only; the cart page shows the server's price. */
+const unitPrice = computed(() => variant.value.price + extras.value)
+const maxQuantity = computed(() => Math.min(MAX_LINE_QUANTITY, variant.value.stock ?? MAX_LINE_QUANTITY))
+watch(maxQuantity, (max) => { if (quantity.value > max) quantity.value = Math.max(1, max) })
+
+/** Returns true when the item went into the cart. */
+function addToCart(): boolean {
+  if (!variant.value.in_stock) return false
+  if (Object.keys(customErrors.value).length) {
+    showErrors.value = true
+    void nextTick(() => document.querySelector<HTMLElement>('[aria-invalid="true"], [role="note"]')?.scrollIntoView({ block: 'center', behavior: 'smooth' }))
+    return false
+  }
+  const clean = cleanCustomization(product.value.customization_schema, custom.value)
+  cart.add({
+    variantId: variant.value.id,
+    productSlug: product.value.slug,
+    productName: product.value.name,
+    variantName: variant.value.name,
+    image: product.value.thumbnail,
+    unitPrice: unitPrice.value,
+    quantity: quantity.value,
+    customization: clean,
+    customizationLabels: describeCustomization(product.value.customization_schema, clean),
+  })
+  justAdded.value = true
+  clearTimeout(addedTimer)
+  addedTimer = setTimeout(() => { justAdded.value = false }, 5000)
+  return true
+}
+
+async function buyNow() {
+  if (addToCart()) await navigateTo('/checkout')
+}
+
 const previewText = computed(() => {
   const f = product.value.customization_schema.find(x => x.type === 'text')
   return f ? (custom.value[f.key] ?? '').trim() : ''
@@ -122,7 +169,8 @@ useHead(() => {
           <UiBadge v-if="product.is_customizable" variant="customizable">Customizable</UiBadge>
         </div>
 
-        <UiPrice class="mt-5" size="lg" :price="variant.price" :compare-at="variant.compare_at_price" />
+        <UiPrice class="mt-5" size="lg" :price="unitPrice" :compare-at="extras ? null : variant.compare_at_price" />
+        <p v-if="extras" class="mt-1 text-xs text-muted">Includes {{ formatTaka(extras) }} for your customization.</p>
         <p class="mt-2 flex items-center gap-2 text-sm font-medium" :class="stock.tone" aria-live="polite">
           <span class="size-2 rounded-full" :class="stock.dot" /> {{ stock.label }}
         </p>
@@ -131,29 +179,67 @@ useHead(() => {
 
         <div class="mt-7 space-y-6">
           <ProductVariantPicker v-model="variantId" :variants="product.variants" />
-          <ProductCustomizationFields v-if="product.customization_schema.length" v-model="custom" :schema="product.customization_schema" />
+          <ProductCustomizationFields v-if="product.customization_schema.length" v-model="custom" :schema="product.customization_schema" :show-errors="showErrors" />
         </div>
 
         <p v-if="readyText" class="mt-6 flex items-center gap-2 text-sm text-muted">
           <UiIcon name="clock" :size="18" class="text-accent" /> {{ readyText }} <span aria-hidden="true">·</span> then delivered across Bangladesh
         </p>
 
-        <!-- Cart + checkout arrive in phase 3. Until then, orders go through Facebook or a phone call. -->
         <div class="mt-6 rounded-lg border border-border bg-surface p-4 sm:p-5">
-          <div class="flex flex-col gap-3 sm:flex-row">
-            <UiButton :href="fb" size="lg" class="flex-1" :disabled="!variant.in_stock" target="_blank" rel="noopener noreferrer">
-              <UiIcon name="facebook" :size="18" /> Order on Facebook
+          <div class="flex items-center gap-4">
+            <div class="flex items-center rounded-md border border-border bg-surface-2" role="group" aria-label="Quantity">
+              <button
+                type="button"
+                class="grid size-11 place-items-center rounded-l-md text-muted transition hover:text-text disabled:opacity-40"
+                aria-label="Decrease quantity"
+                :disabled="quantity <= 1"
+                @click="quantity--"
+              >
+                <UiIcon name="minus" :size="18" />
+              </button>
+              <output class="w-10 text-center font-semibold tabular-nums" aria-live="polite">{{ quantity }}</output>
+              <button
+                type="button"
+                class="grid size-11 place-items-center rounded-r-md text-muted transition hover:text-text disabled:opacity-40"
+                aria-label="Increase quantity"
+                :disabled="quantity >= maxQuantity"
+                @click="quantity++"
+              >
+                <UiIcon name="plus" :size="18" />
+              </button>
+            </div>
+            <p class="text-sm text-muted">
+              Total <strong class="font-display text-lg text-text">{{ formatTaka(unitPrice * quantity) }}</strong>
+            </p>
+          </div>
+
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+            <UiButton size="lg" class="flex-1" :disabled="!variant.in_stock" @click="addToCart">
+              <UiIcon name="cart" :size="18" /> {{ variant.in_stock ? 'Add to cart' : 'Out of stock' }}
             </UiButton>
-            <UiButton :href="tel" variant="secondary" size="lg" class="flex-1">
-              <UiIcon name="phone" :size="18" /> Call to order
+            <UiButton variant="secondary" size="lg" class="flex-1" :disabled="!variant.in_stock" @click="buyNow">
+              Buy now
             </UiButton>
           </div>
-          <p class="mt-3 text-xs text-muted">Online cart &amp; checkout are coming soon. Mention <strong class="text-text">{{ product.name }}</strong>
-            <template v-if="variant.name"> ({{ variant.name }})</template> when you message us.</p>
+
+          <p v-if="justAdded" class="mt-3 flex items-center gap-2 text-sm font-medium text-success" role="status">
+            <UiIcon name="check" :size="16" /> Added to your cart.
+            <NuxtLink to="/cart" class="underline hover:text-accent">View cart</NuxtLink>
+          </p>
+          <p v-else-if="showErrors && Object.keys(customErrors).length" class="mt-3 flex items-center gap-2 text-sm text-danger" role="alert">
+            <UiIcon name="alert" :size="16" /> Please finish the details above first.
+          </p>
+
           <ul class="mt-4 grid gap-2 border-t border-border pt-4 text-sm text-muted sm:grid-cols-2">
             <li class="flex items-center gap-2"><UiIcon name="wallet" :size="16" class="text-accent" /> Cash on delivery</li>
             <li class="flex items-center gap-2"><UiIcon name="truck" :size="16" class="text-accent" /> Delivery across Bangladesh</li>
           </ul>
+          <p class="mt-3 text-xs text-muted">
+            Prefer to chat?
+            <a :href="fb" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-2 hover:underline">Order on Facebook</a>
+            or <a :href="tel" class="font-medium text-accent-2 hover:underline">call {{ phone }}</a>.
+          </p>
         </div>
 
         <dl class="mt-8 divide-y divide-border rounded-lg border border-border bg-surface text-sm">
@@ -183,9 +269,11 @@ useHead(() => {
       <div class="flex items-center gap-3">
         <div class="min-w-0 flex-1">
           <p class="truncate text-xs text-muted">{{ product.name }}</p>
-          <p class="font-display text-lg font-bold text-accent">{{ formatTaka(variant.price) }}</p>
+          <p class="font-display text-lg font-bold text-accent">{{ formatTaka(unitPrice * quantity) }}</p>
         </div>
-        <UiButton :href="fb" :disabled="!variant.in_stock" target="_blank" rel="noopener noreferrer">Order now</UiButton>
+        <UiButton :disabled="!variant.in_stock" @click="addToCart">
+          <UiIcon name="cart" :size="18" /> {{ justAdded ? 'Added' : 'Add to cart' }}
+        </UiButton>
       </div>
     </div>
     <div class="h-16 md:hidden" aria-hidden="true" />

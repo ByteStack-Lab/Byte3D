@@ -59,6 +59,8 @@ useDialog(panel, open, () => { open.value = false })
               <li><NuxtLink to="/shop" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Shop all</NuxtLink></li>
               <li><NuxtLink to="/custom-keyring" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Custom Keyring</NuxtLink></li>
               <li><NuxtLink to="/custom-order" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Custom Order</NuxtLink></li>
+              <li><NuxtLink to="/track" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Track order</NuxtLink></li>
+              <li><NuxtLink to="/account" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">My account</NuxtLink></li>
             </ul>
 
             <p class="mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-muted">Categories</p>

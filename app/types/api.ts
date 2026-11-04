@@ -139,3 +139,118 @@ export interface ProductQuery {
   page?: string
   per_page?: string
 }
+
+// ---------------------------------------------------------------------------
+// Phase 3: cart, checkout, orders, customer account. See backend/CLAUDE.md
+// ("Phase 3 API details") for the parts the root contract does not spell out.
+// ---------------------------------------------------------------------------
+
+export type ShippingZone = 'inside_dhaka' | 'outside_dhaka'
+export type PaymentMethod = 'cod' | 'sslcommerz' | 'bkash'
+
+export type CartMessageType
+  = | 'unavailable'
+    | 'out_of_stock'
+    | 'insufficient_stock'
+    | 'invalid_customization'
+    | 'price_changed'
+    | 'invalid_coupon'
+
+export interface CartMessage {
+  type: CartMessageType
+  message: string
+  variant_id?: number
+  field?: string
+}
+
+/** One cart line as priced by the server. */
+export interface PricedLine {
+  variant_id: number
+  product: { slug: string, name: string } | null
+  variant_name: string | null
+  sku: string | null
+  thumbnail: ApiImage | null
+  quantity: number
+  unit_price: number
+  line_total: number
+  available: boolean
+  /** `null` = made-to-order */
+  stock: number | null
+  customization: Record<string, string>
+}
+
+/** Response of POST /cart/validate (`data`). */
+export interface PricedCart {
+  lines: PricedLine[]
+  subtotal: number
+  discount: number
+  shipping_fee: number
+  total: number
+  shipping_zone: ShippingZone | null
+  coupon: { code: string, discount: number } | null
+  messages: CartMessage[]
+}
+
+export interface CartItemPayload {
+  variant_id: number
+  quantity: number
+  customization: Record<string, string>
+  /** Only used by the server to say "the price changed"; it never prices anything. */
+  unit_price?: number
+}
+
+export interface CheckoutPayload {
+  customer: { name: string, phone: string, email?: string }
+  address: { district: string, area: string, address_line: string }
+  shipping_zone: ShippingZone
+  payment_method: PaymentMethod
+  items: CartItemPayload[]
+  coupon?: string
+  note?: string
+}
+
+export interface CheckoutResult {
+  order_number: string
+  total: number
+  payment: { method: PaymentMethod, redirect_url: string | null }
+}
+
+export type OrderStatus
+  = | 'pending'
+    | 'confirmed'
+    | 'in_production'
+    | 'ready_to_ship'
+    | 'shipped'
+    | 'delivered'
+    | 'cancelled'
+    | 'returned'
+
+export interface Order {
+  order_number: string
+  status: OrderStatus
+  status_label: string
+  payment_method: PaymentMethod
+  payment_status: 'unpaid' | 'paid' | 'failed' | 'refunded'
+  shipping_zone: ShippingZone
+  placed_at: string
+  items: {
+    product_name: string
+    variant_name: string
+    quantity: number
+    unit_price: number
+    line_total: number
+    customization: Record<string, string>
+  }[]
+  subtotal: number
+  discount: number
+  shipping_fee: number
+  total: number
+  timeline: { status: OrderStatus, label: string, at: string }[]
+}
+
+export interface AccountUser {
+  id: number
+  name: string
+  phone: string | null
+  email: string | null
+}

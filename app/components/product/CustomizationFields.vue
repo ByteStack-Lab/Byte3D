@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import type { CustomizationField } from '~/types/api'
 
-defineProps<{ schema: CustomizationField[] }>()
+const props = defineProps<{
+  schema: CustomizationField[]
+  /** Show every field's error now (the shopper pressed "Add to cart"). */
+  showErrors?: boolean
+}>()
 const values = defineModel<Record<string, string>>({ required: true })
 
 const touched = reactive<Record<string, boolean>>({})
-const isUrl = (v: string) => /^https?:\/\/[^\s.]+\.[^\s]{2,}$/i.test(v)
+const errors = computed(() => validateCustomization(props.schema, values.value))
 
 function error(f: CustomizationField): string | null {
-  if (!touched[f.key]) return null
-  const v = (values.value[f.key] ?? '').trim()
-  if (f.required && f.type !== 'image' && !v) return `${f.label} is required.`
-  if (f.type === 'url' && v && !isUrl(v)) return 'Enter a full link starting with https://'
-  return null
+  if (f.type === 'image') return null // explained by the note below the field
+  return props.showErrors || touched[f.key] ? (errors.value[f.key] ?? null) : null
 }
 
 function set(key: string, value: string) {

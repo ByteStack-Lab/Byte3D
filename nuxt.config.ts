@@ -57,6 +57,9 @@ export default defineNuxtConfig({
   routeRules: {
     '/cart': { ssr: false, headers: { 'X-Robots-Tag': 'noindex' } },
     '/checkout': { ssr: false, headers: { 'X-Robots-Tag': 'noindex' } },
+    '/account': { ssr: false, headers: { 'X-Robots-Tag': 'noindex' } },
+    '/order/**': { ssr: false, headers: { 'X-Robots-Tag': 'noindex' } },
+    '/track': { headers: { 'X-Robots-Tag': 'noindex' } },
   },
 
   app: {

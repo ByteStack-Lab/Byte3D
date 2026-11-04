@@ -208,6 +208,12 @@ testimonials, prototype CTA banner.
   select (sets `shipping_zone`: Dhaka → inside_dhaka), area, address, payment method, order summary.
   Submit → `/order/{number}` or gateway redirect.
 
+## Credentialed calls
+Cart, checkout and account calls go through `$send()` (`composables/useApi.ts`): it sends the Sanctum session cookie,
+fetches `/sanctum/csrf-cookie` when needed and echoes `X-XSRF-TOKEN` (retrying once on 419). `/cart`, `/checkout`,
+`/account` and `/order/**` are client-rendered, so none of this runs on the server. Request/response shapes for these
+endpoints are in `../backend/CLAUDE.md` ("Phase 3 API details") and `app/types/api.ts`.
+
 ## Rules
 - All API calls go through `useApi` with types from `types/api.ts`. No scattered raw `fetch`.
 - Never compute totals for submission on the client; display server values.

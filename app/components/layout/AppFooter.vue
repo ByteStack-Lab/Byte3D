@@ -51,6 +51,7 @@ const socials = computed(() => [
           <li><NuxtLink to="/custom-order" class="transition hover:text-accent">Custom print from your idea</NuxtLink></li>
           <li><NuxtLink to="/custom-order" class="transition hover:text-accent">Prototypes & robotics parts</NuxtLink></li>
           <li><NuxtLink to="/shop?customizable=1" class="transition hover:text-accent">Personalised products</NuxtLink></li>
+          <li><NuxtLink to="/track" class="transition hover:text-accent">Track your order</NuxtLink></li>
         </ul>
       </nav>
 

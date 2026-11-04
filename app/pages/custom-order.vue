@@ -9,6 +9,7 @@ useSeoMeta({
   description: 'Tell us your project — custom 3D print, prototype, robotics part or laser engraving — and we will call you to confirm.',
 })
 useCanonical()
+const { track, context: trackingContext } = useTracking()
 const { data: settings } = await useSettings()
 const s = computed(() => settings.value?.data)
 const phoneHref = computed(() => `tel:${(s.value?.contact.phone ?? '+8801812209019').replace(/[^+\d]/g, '')}`)
@@ -71,9 +72,11 @@ async function submit() {
     const body = new FormData()
     const values: Record<string, string> = { ...form, name: form.name.trim(), phone: normalizePhone(form.phone), description: form.description.trim(), email: form.email.trim(), material_preference: form.material_preference.trim() }
     for (const [key, value] of Object.entries(values)) if (value !== '') body.append(key, value)
+    for (const [key, value] of Object.entries(trackingContext())) if (value) body.append(`tracking[${key}]`, value)
     for (const file of files.value) body.append('files[]', file)
 
     const res = await $api<{ quote_number: string }>('/custom-quotes', { method: 'POST', body })
+    track('Lead', { name: form.service_type, eventId: res.quote_number })
     sent.value = { number: res.quote_number, name: form.name.trim() }
     Object.assign(form, emptyForm())
     files.value = []

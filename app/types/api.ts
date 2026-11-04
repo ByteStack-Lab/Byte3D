@@ -115,6 +115,8 @@ export interface PublicSettings {
   socials: { facebook: string | null, instagram: string | null, tiktok: string | null }
   shipping: { inside_dhaka: number, outside_dhaka: number }
   payment_methods: string[]
+  /** Meta Pixel id set in the admin; null when tracking is off. */
+  facebook_pixel_id: string | null
 }
 
 export interface ApiErrorBody {
@@ -207,6 +209,8 @@ export interface CheckoutPayload {
   items: CartItemPayload[]
   coupon?: string
   note?: string
+  /** Meta `_fbp` / `_fbc` cookies and page URL, for server-side conversion matching. Optional. */
+  tracking?: { fbp?: string, fbc?: string, source_url?: string }
 }
 
 export interface CheckoutResult {

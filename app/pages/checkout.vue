@@ -4,6 +4,7 @@ import type { CheckoutPayload, CheckoutResult, PaymentMethod } from '~/types/api
 useSeoMeta({ title: 'Checkout', robots: 'noindex' })
 
 const cart = useCartStore()
+const { track, context: trackingContext } = useTracking()
 const auth = useAuthStore()
 const { data: settings } = await useSettings()
 
@@ -21,6 +22,14 @@ watchEffect(() => {
 const placed = ref(false)
 watch(() => [cart.hydrated, cart.isEmpty], () => {
   if (cart.hydrated && cart.isEmpty && !placed.value) void navigateTo('/cart')
+}, { immediate: true })
+
+// Once per visit to this page, when the server price is known.
+let reportedCheckout = false
+watch(priced, (p) => {
+  if (reportedCheckout || !p || !p.lines.length) return
+  reportedCheckout = true
+  track('InitiateCheckout', { value: p.total, quantity: p.lines.reduce((n, l) => n + l.quantity, 0) })
 }, { immediate: true })
 
 // Signed-in customers get their details filled in.
@@ -97,6 +106,7 @@ async function submit() {
     items: cart.lines.map(l => ({ variant_id: l.variantId, quantity: l.quantity, customization: l.customization })),
     ...(cart.couponCode ? { coupon: cart.couponCode } : {}),
     ...(form.note.trim() ? { note: form.note.trim() } : {}),
+    tracking: trackingContext(),
   }
 
   submitting.value = true

@@ -22,6 +22,13 @@ const quantity = ref(1)
 const showErrors = ref(false)
 const justAdded = ref(false)
 const cart = useCartStore()
+const { track } = useTracking()
+
+function trackView() {
+  track('ViewContent', { name: product.value.name, ids: [variant.value.sku], value: variant.value.price })
+}
+onMounted(trackView)
+watch(slug, () => void nextTick(trackView))
 let addedTimer: ReturnType<typeof setTimeout> | undefined
 onBeforeUnmount(() => clearTimeout(addedTimer))
 
@@ -55,6 +62,7 @@ function addToCart(): boolean {
     customization: clean,
     customizationLabels: describeCustomization(product.value.customization_schema, clean),
   })
+  track('AddToCart', { name: product.value.name, ids: [variant.value.sku], value: unitPrice.value * quantity.value, quantity: quantity.value })
   justAdded.value = true
   clearTimeout(addedTimer)
   addedTimer = setTimeout(() => { justAdded.value = false }, 5000)

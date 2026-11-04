@@ -17,6 +17,8 @@ export default defineNuxtConfig({
     public: {
       apiBase: 'http://localhost:8000/api/v1',
       siteUrl: 'http://localhost:3000',
+      // Google Analytics 4 measurement id (G-XXXXXXX), optional. Set with NUXT_PUBLIC_GA_ID.
+      gaId: '',
     },
   },
 

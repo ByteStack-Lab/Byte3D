@@ -20,6 +20,13 @@ async function loadOrder() {
   catch { /* the page still works from what checkout remembered */ }
 }
 
+const { track, once } = useTracking()
+/** The browser Pixel counts the purchase once the order is real: placed (cash on delivery) or paid (online). The server reports it too, with the same id. */
+watch(order, (o) => {
+  if (!o || (o.payment_method !== 'cod' && o.payment_status !== 'paid')) return
+  once(`purchase:${o.order_number}`, () => track('Purchase', { value: o.total, eventId: o.order_number, quantity: o.items.reduce((n, i) => n + i.quantity, 0) }))
+})
+
 let pollTimer: ReturnType<typeof setTimeout> | undefined
 /** The gateway's own server call can arrive a few seconds after the shopper: look again a few times. */
 function pollWhileConfirming(attempt = 0) {

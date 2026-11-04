@@ -249,6 +249,8 @@ export interface Order {
   discount: number
   shipping_fee: number
   total: number
+  /** Set once the parcel is booked with a courier. */
+  shipment: { courier: string, tracking_code: string | null, tracking_url: string | null } | null
   timeline: { status: OrderStatus, label: string, at: string }[]
 }
 

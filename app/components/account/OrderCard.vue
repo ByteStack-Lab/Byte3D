@@ -33,6 +33,13 @@ const stopped = computed(() => props.order.status === 'cancelled' || props.order
     </ol>
     <p v-else class="mt-4 rounded-md bg-danger/10 p-3 text-sm text-danger">This order was {{ order.status === 'cancelled' ? 'cancelled' : 'returned' }}.</p>
 
+    <p v-if="order.shipment" class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-surface-2 p-3 text-sm">
+      <UiIcon name="truck" :size="16" class="text-accent" />
+      <span>With <strong>{{ order.shipment.courier }}</strong></span>
+      <span v-if="order.shipment.tracking_code" class="text-muted">· Tracking code <span class="font-medium text-text">{{ order.shipment.tracking_code }}</span></span>
+      <a v-if="order.shipment.tracking_url" :href="order.shipment.tracking_url" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-2 hover:underline">Track parcel</a>
+    </p>
+
     <ul class="mt-5 divide-y divide-border border-t border-border text-sm">
       <li v-for="(item, i) in order.items" :key="i" class="flex justify-between gap-4 py-3">
         <div class="min-w-0">

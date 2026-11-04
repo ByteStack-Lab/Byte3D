@@ -73,7 +73,13 @@ const socials = computed(() => [
     <div class="border-t border-border">
       <div class="container-page flex flex-col items-center justify-between gap-2 py-5 text-xs text-muted sm:flex-row">
         <p>© {{ new Date().getFullYear() }} Byte3D. All rights reserved.</p>
-        <p>byte3d.store</p>
+        <nav aria-label="Company" class="flex flex-wrap justify-center gap-x-5 gap-y-2">
+          <NuxtLink to="/about" class="transition hover:text-accent">About</NuxtLink>
+          <NuxtLink to="/contact" class="transition hover:text-accent">Contact</NuxtLink>
+          <NuxtLink to="/returns" class="transition hover:text-accent">Returns</NuxtLink>
+          <NuxtLink to="/privacy" class="transition hover:text-accent">Privacy</NuxtLink>
+          <NuxtLink to="/terms" class="transition hover:text-accent">Terms</NuxtLink>
+        </nav>
       </div>
     </div>
   </footer>

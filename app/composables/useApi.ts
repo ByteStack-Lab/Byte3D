@@ -76,13 +76,14 @@ export async function $send<T>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELET
 
   const request = async () => {
     if (!isRead && !readXsrfToken()) await fetchCsrfCookie()
+    // `path` is an API path, never one of our own Nitro routes: skip Nitro's typed-route inference.
     return $fetch<T>(path, {
       baseURL: apiBase,
       method,
       body: body as Record<string, unknown> | undefined,
       credentials: 'include',
       headers: { 'Accept': 'application/json', ...(isRead ? {} : { 'X-XSRF-TOKEN': readXsrfToken() ?? '' }) },
-    })
+    } as never) as unknown as Promise<T>
   }
 
   try {

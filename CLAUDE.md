@@ -231,3 +231,14 @@ endpoints are in `../backend/CLAUDE.md` ("Phase 3 API details") and `app/types/a
 robots.txt), optional `NUXT_PUBLIC_GA_ID`. The Meta Pixel ID comes from the backend admin, not from here. Build with `npm run build` and run
 `node .output/server/index.mjs` behind a reverse proxy with TLS (use Supervisor or pm2 to keep it up). The sitemap is cached for an hour.
 Before launch: run Lighthouse (mobile) on `/`, a category and a product page; the budget is Performance ≥ 85.
+
+## Language (English / Bangla)
+Native and dependency-free: `useLocale()` (`app/composables/useLocale.ts`) gives `t(key, params)` and `tp(base, n)` (plurals via `.one` / `.other`).
+The choice lives in the `b3d-lang` cookie, so the server renders the right language on the first request (no flash) and sets `<html lang>`;
+`LayoutLangToggle` (header + mobile menu) switches it.
+- Text lives in `app/locales/en.ts` and `app/locales/bn.ts`. `bn` is typed `Record<MessageKey, string>`, so **a missing Bangla key is a type error**
+  (`npm run typecheck`). New UI text: add the key to both files, never hard-code a string in a template.
+- Plain functions that cannot call composables (validation, file checks) take `t` as a parameter (`type Translate`).
+- Not translated, on purpose: product/category names and descriptions and the hero text once the admin has edited it (they come from the backend as the
+  admin wrote them), server validation messages, district names, the long legal pages (About, Privacy, Terms, Returns) and the name-keyring builder
+  (it only prints English letters). The Bangla wording was written by Claude: have a native speaker review it before launch.

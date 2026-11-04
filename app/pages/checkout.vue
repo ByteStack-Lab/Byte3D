@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { CheckoutPayload, CheckoutResult, PaymentMethod } from '~/types/api'
 
-useSeoMeta({ title: 'Checkout', robots: 'noindex' })
+const { t } = useLocale()
+useSeoMeta({ title: () => t('cart.checkout'), robots: 'noindex' })
 
 const cart = useCartStore()
 const { track, context: trackingContext } = useTracking()
@@ -46,17 +47,19 @@ const touched = reactive<Record<string, boolean>>({})
 const submitted = ref(false)
 const submitting = ref(false)
 const formError = ref<string | null>(null)
+/** The message is about the cart itself, so offer a link back to it. */
+const cartIssue = ref(false)
 const serverErrors = ref<Record<string, string>>({})
 
 const clientErrors = computed(() => {
   const e: Record<string, string> = {}
-  if (!form.name.trim()) e.name = 'Enter your name.'
-  if (!form.phone.trim()) e.phone = 'Enter your mobile number.'
-  else if (!isValidPhone(form.phone)) e.phone = 'Use a Bangladeshi mobile number, like 01XXXXXXXXX.'
-  if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim())) e.email = 'That email does not look right.'
-  if (!form.district) e.district = 'Choose your district.'
-  if (!form.area.trim()) e.area = 'Enter your area or thana.'
-  if (!form.address_line.trim()) e.address_line = 'Enter your full address.'
+  if (!form.name.trim()) e.name = t('checkout.errName')
+  if (!form.phone.trim()) e.phone = t('checkout.errPhone')
+  else if (!isValidPhone(form.phone)) e.phone = t('checkout.errPhoneInvalid')
+  if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim())) e.email = t('checkout.errEmail')
+  if (!form.district) e.district = t('checkout.errDistrict')
+  if (!form.area.trim()) e.area = t('checkout.errArea')
+  if (!form.address_line.trim()) e.address_line = t('checkout.errAddress')
   return e
 })
 
@@ -79,13 +82,14 @@ const SERVER_FIELD: Record<string, string> = {
 
 const hasUnavailable = computed(() => !!priced.value?.lines.some(l => !l.available))
 const shippingText = computed(() => {
-  if (!zone.value) return 'Choose your district'
+  if (!zone.value) return t('checkout.chooseYourDistrict')
   return priced.value ? formatTaka(priced.value.shipping_fee) : '—'
 })
 
 async function submit() {
   submitted.value = true
   formError.value = null
+  cartIssue.value = false
   serverErrors.value = {}
 
   const firstInvalid = Object.keys(clientErrors.value)[0]
@@ -94,7 +98,8 @@ async function submit() {
     return
   }
   if (!zone.value || !priced.value || hasUnavailable.value) {
-    formError.value = hasUnavailable.value ? 'Some items in your cart are unavailable.' : 'Please wait while we check your cart.'
+    cartIssue.value = hasUnavailable.value
+    formError.value = hasUnavailable.value ? t('checkout.unavailable') : t('checkout.waitCheck')
     return
   }
 
@@ -128,11 +133,12 @@ async function submit() {
       if (field) serverErrors.value[field] = messages[0]!
     }
     if (Object.keys(err.errors).some(k => k.startsWith('items.'))) {
-      formError.value = 'Something in your cart changed (price or stock). Please review it and try again.'
+      cartIssue.value = true
+      formError.value = t('checkout.cartChanged')
       void refresh()
     }
     else if (err.errors.coupon) {
-      formError.value = `Your coupon could not be used: ${err.errors.coupon[0]}`
+      formError.value = t('checkout.couponFailed', { message: err.errors.coupon[0]! })
       cart.couponCode = ''
     }
     else if (!Object.keys(serverErrors.value).length) {
@@ -148,20 +154,20 @@ async function submit() {
 <template>
   <div class="container-page py-8 sm:py-12">
     <NuxtLink to="/cart" class="inline-flex items-center gap-1 text-sm text-muted hover:text-text">
-      <UiIcon name="chevron-left" :size="16" /> Back to cart
+      <UiIcon name="chevron-left" :size="16" /> {{ t('checkout.back') }}
     </NuxtLink>
-    <h1 class="mt-2 text-3xl font-bold sm:text-4xl">Checkout</h1>
+    <h1 class="mt-2 text-3xl font-bold sm:text-4xl">{{ t('cart.checkout') }}</h1>
 
     <form class="mt-8 grid gap-8 lg:grid-cols-[1fr_24rem] lg:items-start" novalidate @submit.prevent="submit">
       <div class="space-y-8">
         <p v-if="formError" class="flex items-start gap-2 rounded-lg border border-danger/50 bg-danger/10 p-4 text-sm text-danger" role="alert">
           <UiIcon name="alert" :size="18" class="mt-0.5 shrink-0" />
-          <span>{{ formError }} <NuxtLink v-if="hasUnavailable || formError.includes('cart')" to="/cart" class="font-semibold underline">Review cart</NuxtLink></span>
+          <span>{{ formError }} <NuxtLink v-if="hasUnavailable || cartIssue" to="/cart" class="font-semibold underline">{{ t('checkout.reviewCart') }}</NuxtLink></span>
         </p>
 
         <fieldset class="space-y-4 rounded-lg border border-border bg-surface p-5">
-          <legend class="-ml-1 px-1 text-lg font-bold">Your details</legend>
-          <UiField id="f-name" label="Full name" required :error="fieldError('name')">
+          <legend class="-ml-1 px-1 text-lg font-bold">{{ t('checkout.yourDetails') }}</legend>
+          <UiField id="f-name" :label="t('checkout.fullName')" required :error="fieldError('name')">
             <template #default="{ invalid, describedBy }">
               <input
                 id="f-name" v-model="form.name" type="text" autocomplete="name" :class="inputClass(invalid)"
@@ -170,7 +176,7 @@ async function submit() {
             </template>
           </UiField>
           <div class="grid gap-4 sm:grid-cols-2">
-            <UiField id="f-phone" label="Mobile number" required :error="fieldError('phone')" hint="We call or message this number about your order.">
+            <UiField id="f-phone" :label="t('checkout.mobile')" required :error="fieldError('phone')" :hint="t('checkout.mobileHint')">
               <template #default="{ invalid, describedBy }">
                 <input
                   id="f-phone" v-model="form.phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX" :class="inputClass(invalid)"
@@ -178,7 +184,7 @@ async function submit() {
                 >
               </template>
             </UiField>
-            <UiField id="f-email" label="Email" :error="fieldError('email')" hint="For your receipt, if you like.">
+            <UiField id="f-email" :label="t('checkout.email')" :error="fieldError('email')" :hint="t('checkout.emailHint')">
               <template #default="{ invalid, describedBy }">
                 <input
                   id="f-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" :class="inputClass(invalid)"
@@ -190,29 +196,29 @@ async function submit() {
         </fieldset>
 
         <fieldset class="space-y-4 rounded-lg border border-border bg-surface p-5">
-          <legend class="-ml-1 px-1 text-lg font-bold">Delivery address</legend>
+          <legend class="-ml-1 px-1 text-lg font-bold">{{ t('checkout.deliveryAddress') }}</legend>
           <div class="grid gap-4 sm:grid-cols-2">
-            <UiField id="f-district" label="District" required :error="fieldError('district')">
+            <UiField id="f-district" :label="t('checkout.district')" required :error="fieldError('district')">
               <template #default="{ invalid, describedBy }">
                 <select
                   id="f-district" v-model="form.district" autocomplete="address-level1" :class="inputClass(invalid)"
                   :aria-invalid="invalid" :aria-describedby="describedBy" @blur="touched.district = true" @change="clearServerError('district')"
                 >
-                  <option value="" disabled>Choose district</option>
+                  <option value="" disabled>{{ t('checkout.chooseDistrict') }}</option>
                   <option v-for="d in DISTRICTS" :key="d" :value="d">{{ d }}</option>
                 </select>
               </template>
             </UiField>
-            <UiField id="f-area" label="Area / Thana" required :error="fieldError('area')">
+            <UiField id="f-area" :label="t('checkout.area')" required :error="fieldError('area')">
               <template #default="{ invalid, describedBy }">
                 <input
-                  id="f-area" v-model="form.area" type="text" autocomplete="address-level2" placeholder="e.g. Mirpur 10" :class="inputClass(invalid)"
+                  id="f-area" v-model="form.area" type="text" autocomplete="address-level2" :placeholder="t('checkout.areaPlaceholder')" :class="inputClass(invalid)"
                   :aria-invalid="invalid" :aria-describedby="describedBy" @blur="touched.area = true" @input="clearServerError('area')"
                 >
               </template>
             </UiField>
           </div>
-          <UiField id="f-address_line" label="Full address" required :error="fieldError('address_line')" hint="House, road, landmark.">
+          <UiField id="f-address_line" :label="t('checkout.address')" required :error="fieldError('address_line')" :hint="t('checkout.addressHint')">
             <template #default="{ invalid, describedBy }">
               <input
                 id="f-address_line" v-model="form.address_line" type="text" autocomplete="street-address" :class="inputClass(invalid)"
@@ -220,10 +226,10 @@ async function submit() {
               >
             </template>
           </UiField>
-          <UiField id="f-note" label="Note for us" :error="fieldError('note')">
+          <UiField id="f-note" :label="t('checkout.note')" :error="fieldError('note')">
             <template #default="{ invalid, describedBy }">
               <textarea
-                id="f-note" v-model="form.note" rows="2" maxlength="500" placeholder="Anything we should know?"
+                id="f-note" v-model="form.note" rows="2" maxlength="500" :placeholder="t('checkout.notePlaceholder')"
                 class="w-full rounded-md border bg-surface-2 px-4 py-3 text-base placeholder:text-muted/70 focus:outline-none"
                 :class="invalid ? 'border-danger' : 'border-border focus:border-accent'" :aria-describedby="describedBy"
               />
@@ -232,7 +238,7 @@ async function submit() {
         </fieldset>
 
         <fieldset class="rounded-lg border border-border bg-surface p-5">
-          <legend class="-ml-1 px-1 text-lg font-bold">Payment</legend>
+          <legend class="-ml-1 px-1 text-lg font-bold">{{ t('checkout.payment') }}</legend>
           <div class="mt-3 space-y-2">
             <label
               v-for="m in paymentMethods"
@@ -241,16 +247,16 @@ async function submit() {
               :class="paymentMethod === m ? 'border-accent bg-accent/5' : 'border-border hover:border-accent/50'"
             >
               <input v-model="paymentMethod" type="radio" name="payment" :value="m" class="size-4 accent-[var(--color-accent)]">
-              <span class="font-medium">{{ PAYMENT_LABELS[m] }}</span>
-              <span v-if="m === 'cod'" class="ml-auto text-xs text-muted">Pay when it arrives</span>
-              <span v-else class="ml-auto text-xs text-muted">Pay securely now</span>
+              <span class="font-medium">{{ t(PAYMENT_KEYS[m]) }}</span>
+              <span v-if="m === 'cod'" class="ml-auto text-xs text-muted">{{ t('checkout.payWhenArrives') }}</span>
+              <span v-else class="ml-auto text-xs text-muted">{{ t('checkout.paySecurely') }}</span>
             </label>
           </div>
         </fieldset>
       </div>
 
-      <aside class="rounded-lg border border-border bg-surface p-5 lg:sticky lg:top-24" aria-label="Order summary">
-        <h2 class="text-lg font-bold">Order summary</h2>
+      <aside class="rounded-lg border border-border bg-surface p-5 lg:sticky lg:top-24" :aria-label="t('cart.orderSummary')">
+        <h2 class="text-lg font-bold">{{ t('cart.orderSummary') }}</h2>
 
         <p v-if="pricingError" class="mt-3 text-sm text-danger" role="alert">{{ pricingError.message }}</p>
         <CartOrderSummaryLines v-if="priced" class="mt-2" :lines="priced.lines" />
@@ -258,28 +264,28 @@ async function submit() {
 
         <dl class="mt-2 space-y-2 border-t border-border pt-4 text-sm" :class="pending && 'opacity-60'">
           <div class="flex justify-between">
-            <dt class="text-muted">Subtotal</dt>
+            <dt class="text-muted">{{ t('cart.subtotal') }}</dt>
             <dd class="tabular-nums">{{ priced ? formatTaka(priced.subtotal) : '—' }}</dd>
           </div>
           <div v-if="priced?.coupon" class="flex justify-between text-success">
-            <dt>Coupon {{ priced.coupon.code }}</dt>
+            <dt>{{ t('checkout.couponLine', { code: priced.coupon.code }) }}</dt>
             <dd class="tabular-nums">−{{ formatTaka(priced.discount) }}</dd>
           </div>
           <div class="flex justify-between">
-            <dt class="text-muted">Shipping <span v-if="zone" class="text-xs">({{ zone === 'inside_dhaka' ? 'inside' : 'outside' }} Dhaka)</span></dt>
+            <dt class="text-muted">{{ t('cart.shipping') }} <span v-if="zone" class="text-xs">{{ t(zone === 'inside_dhaka' ? 'checkout.zoneInside' : 'checkout.zoneOutside') }}</span></dt>
             <dd class="tabular-nums" :class="!zone && 'text-muted'">{{ shippingText }}</dd>
           </div>
           <div class="flex items-baseline justify-between border-t border-border pt-3 text-base font-bold">
-            <dt>Total</dt>
+            <dt>{{ t('cart.total') }}</dt>
             <dd class="font-display text-xl tabular-nums">{{ priced ? formatTaka(priced.total) : '—' }}</dd>
           </div>
         </dl>
 
         <UiButton type="submit" size="lg" block class="mt-5" :disabled="submitting || !priced">
-          {{ submitting ? 'Placing order…' : 'Place order' }}
+          {{ submitting ? t('checkout.placing') : t('checkout.place') }}
         </UiButton>
         <p class="mt-3 text-center text-xs text-muted">
-          By placing the order you agree to be contacted to confirm it. Prices are checked again when you order.
+          {{ t('checkout.agree') }}
         </p>
       </aside>
     </form>

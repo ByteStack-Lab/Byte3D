@@ -1,5 +1,6 @@
 <script setup lang="ts">
-useSeoMeta({ title: 'Your cart', robots: 'noindex' })
+const { t } = useLocale()
+useSeoMeta({ title: () => t('cart.seoTitle'), robots: 'noindex' })
 
 const cart = useCartStore()
 const { priced, pending, error } = useCartPricing()
@@ -29,21 +30,21 @@ function removeUnavailable() {
 
 <template>
   <div class="container-page py-8 sm:py-12">
-    <h1 class="text-3xl font-bold sm:text-4xl">Your cart</h1>
+    <h1 class="text-3xl font-bold sm:text-4xl">{{ t('cart.seoTitle') }}</h1>
 
     <UiEmptyState
       v-if="cart.hydrated && cart.isEmpty"
       class="mt-8"
       icon="cart"
-      title="Your cart is empty"
-      description="Add something you like and it will wait for you here."
+      :title="t('cart.empty')"
+      :description="t('cart.emptyHint')"
     >
-      <UiButton to="/shop">Browse the shop</UiButton>
-      <UiButton to="/custom-keyring" variant="secondary">Design a name keyring</UiButton>
+      <UiButton to="/shop">{{ t('cart.browse') }}</UiButton>
+      <UiButton to="/custom-keyring" variant="secondary">{{ t('cart.designKeyring') }}</UiButton>
     </UiEmptyState>
 
     <div v-else class="mt-8 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
-      <section aria-label="Items in your cart">
+      <section :aria-label="t('cart.itemsLabel')">
         <p v-if="error" class="mb-4 flex items-start gap-2 rounded-lg border border-danger/50 bg-danger/10 p-4 text-sm text-danger" role="alert">
           <UiIcon name="alert" :size="18" class="mt-0.5" /> {{ error.message }}
         </p>
@@ -77,7 +78,7 @@ function removeUnavailable() {
                   <button
                     type="button"
                     class="grid size-10 shrink-0 place-items-center rounded-md text-muted transition hover:bg-surface-2 hover:text-danger"
-                    :aria-label="`Remove ${line.productName}`"
+                    :aria-label="t('cart.removeItem', { name: line.productName })"
                     @click="cart.remove(line.key)"
                   >
                     <UiIcon name="trash" :size="18" />
@@ -85,11 +86,11 @@ function removeUnavailable() {
                 </div>
 
                 <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-                  <div class="flex items-center rounded-md border border-border bg-surface-2" role="group" :aria-label="`Quantity of ${line.productName}`">
+                  <div class="flex items-center rounded-md border border-border bg-surface-2" role="group" :aria-label="t('cart.qtyOf', { name: line.productName })">
                     <button
                       type="button"
                       class="grid size-10 place-items-center rounded-l-md text-muted transition hover:text-text disabled:opacity-40"
-                      aria-label="Decrease quantity"
+                      :aria-label="t('product.decrease')"
                       :disabled="line.quantity <= 1"
                       @click="cart.setQuantity(line.key, line.quantity - 1)"
                     >
@@ -99,7 +100,7 @@ function removeUnavailable() {
                     <button
                       type="button"
                       class="grid size-10 place-items-center rounded-r-md text-muted transition hover:text-text disabled:opacity-40"
-                      aria-label="Increase quantity"
+                      :aria-label="t('product.increase')"
                       :disabled="line.quantity >= MAX_LINE_QUANTITY"
                       @click="cart.setQuantity(line.key, line.quantity + 1)"
                     >
@@ -110,7 +111,7 @@ function removeUnavailable() {
                   <div class="text-right">
                     <template v-if="serverLines">
                       <p v-if="serverLines[i]!.available" class="font-display text-lg font-bold tabular-nums">{{ formatTaka(serverLines[i]!.line_total) }}</p>
-                      <p v-if="serverLines[i]!.available && line.quantity > 1" class="text-xs text-muted">{{ formatTaka(serverLines[i]!.unit_price) }} each</p>
+                      <p v-if="serverLines[i]!.available && line.quantity > 1" class="text-xs text-muted">{{ t('cart.each', { price: formatTaka(serverLines[i]!.unit_price) }) }}</p>
                     </template>
                     <UiSkeleton v-else class="ml-auto h-6 w-20" />
                   </div>
@@ -133,18 +134,18 @@ function removeUnavailable() {
         </ul>
 
         <button v-if="hasUnavailable" type="button" class="mt-4 text-sm font-medium text-danger underline" @click="removeUnavailable">
-          Remove unavailable items
+          {{ t('cart.removeUnavailable') }}
         </button>
       </section>
 
-      <aside class="rounded-lg border border-border bg-surface p-5 lg:sticky lg:top-24" aria-label="Order summary">
-        <h2 class="text-lg font-bold">Summary</h2>
+      <aside class="rounded-lg border border-border bg-surface p-5 lg:sticky lg:top-24" :aria-label="t('cart.orderSummary')">
+        <h2 class="text-lg font-bold">{{ t('cart.summary') }}</h2>
 
         <form class="mt-4" @submit.prevent="applyCoupon">
-          <label for="coupon" class="mb-1.5 block text-sm font-medium">Coupon code</label>
+          <label for="coupon" class="mb-1.5 block text-sm font-medium">{{ t('cart.coupon') }}</label>
           <div v-if="priced?.coupon" class="flex items-center justify-between rounded-md border border-success/50 bg-success/10 px-3 py-2 text-sm">
             <span class="flex items-center gap-2 font-semibold text-success"><UiIcon name="tag" :size="16" /> {{ priced.coupon.code }}</span>
-            <button type="button" class="text-xs text-muted underline hover:text-text" @click="removeCoupon">Remove</button>
+            <button type="button" class="text-xs text-muted underline hover:text-text" @click="removeCoupon">{{ t('cart.remove') }}</button>
           </div>
           <div v-else class="flex gap-2">
             <input
@@ -159,39 +160,39 @@ function removeUnavailable() {
               class="h-11 min-w-0 flex-1 rounded-md border bg-surface-2 px-3 text-sm uppercase placeholder:normal-case placeholder:text-muted/70 focus:outline-none"
               :class="couponMessage ? 'border-danger' : 'border-border focus:border-accent'"
             >
-            <UiButton type="submit" variant="secondary" :disabled="!couponInput.trim()">Apply</UiButton>
+            <UiButton type="submit" variant="secondary" :disabled="!couponInput.trim()">{{ t('filter.apply') }}</UiButton>
           </div>
           <p id="coupon-msg" class="mt-1 min-h-4 text-xs text-danger" role="alert">{{ couponMessage }}</p>
         </form>
 
         <dl class="mt-3 space-y-2 border-t border-border pt-4 text-sm" :class="pending && 'opacity-60'">
           <div class="flex justify-between">
-            <dt class="text-muted">Subtotal</dt>
+            <dt class="text-muted">{{ t('cart.subtotal') }}</dt>
             <dd class="tabular-nums">{{ priced ? formatTaka(priced.subtotal) : '—' }}</dd>
           </div>
           <div v-if="priced && priced.discount" class="flex justify-between text-success">
-            <dt>Discount</dt>
+            <dt>{{ t('cart.discount') }}</dt>
             <dd class="tabular-nums">−{{ formatTaka(priced.discount) }}</dd>
           </div>
           <div class="flex justify-between">
-            <dt class="text-muted">Shipping</dt>
-            <dd class="text-muted">Calculated at checkout</dd>
+            <dt class="text-muted">{{ t('cart.shipping') }}</dt>
+            <dd class="text-muted">{{ t('cart.shippingAtCheckout') }}</dd>
           </div>
           <div class="flex items-baseline justify-between border-t border-border pt-3 text-base font-bold">
-            <dt>Total</dt>
+            <dt>{{ t('cart.total') }}</dt>
             <dd class="font-display text-xl tabular-nums">{{ priced ? formatTaka(priced.total) : '—' }}</dd>
           </div>
         </dl>
 
         <UiButton to="/checkout" size="lg" block class="mt-5" :disabled="!canCheckout">
-          Checkout
+          {{ t('cart.checkout') }}
           <UiIcon name="arrow-right" :size="18" />
         </UiButton>
-        <p v-if="hasUnavailable" class="mt-2 text-xs text-danger">Remove the unavailable items to continue.</p>
+        <p v-if="hasUnavailable" class="mt-2 text-xs text-danger">{{ t('cart.removeToContinue') }}</p>
 
         <ul class="mt-5 space-y-2 border-t border-border pt-4 text-xs text-muted">
-          <li class="flex items-center gap-2"><UiIcon name="wallet" :size="14" class="text-accent" /> Pay cash on delivery</li>
-          <li class="flex items-center gap-2"><UiIcon name="truck" :size="14" class="text-accent" /> Delivery across Bangladesh</li>
+          <li class="flex items-center gap-2"><UiIcon name="wallet" :size="14" class="text-accent" /> {{ t('cart.payCod') }}</li>
+          <li class="flex items-center gap-2"><UiIcon name="truck" :size="14" class="text-accent" /> {{ t('footer.delivery') }}</li>
         </ul>
       </aside>
     </div>

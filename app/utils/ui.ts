@@ -1,8 +1,16 @@
 import type { OrderStatus, PaymentMethod } from '~/types/api'
+import type { MessageKey } from '~/locales/en'
 
 /** Classes for text inputs and selects; the border turns red when the field is invalid. */
 export const inputClass = (invalid: boolean) =>
   `h-12 w-full rounded-md border bg-surface-2 px-4 text-base placeholder:text-muted/70 focus:outline-none ${invalid ? 'border-danger' : 'border-border focus:border-accent'}`
+
+/** Message keys for each payment method (see `useLocale`). */
+export const PAYMENT_KEYS: Record<PaymentMethod, MessageKey> = {
+  cod: 'footer.cod',
+  sslcommerz: 'pay.sslcommerz',
+  bkash: 'pay.bkash',
+}
 
 export const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   cod: 'Cash on delivery',

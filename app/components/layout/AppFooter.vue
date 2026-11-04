@@ -47,6 +47,7 @@ const socials = computed(() => [
       <nav aria-label="Help">
         <h2 class="text-sm font-semibold uppercase tracking-wider text-text">Services</h2>
         <ul class="mt-4 space-y-2.5 text-sm text-muted">
+          <li><NuxtLink to="/custom-keyring" class="transition hover:text-accent">Custom name keyring</NuxtLink></li>
           <li><NuxtLink to="/custom-order" class="transition hover:text-accent">Custom print from your idea</NuxtLink></li>
           <li><NuxtLink to="/custom-order" class="transition hover:text-accent">Prototypes & robotics parts</NuxtLink></li>
           <li><NuxtLink to="/shop?customizable=1" class="transition hover:text-accent">Personalised products</NuxtLink></li>

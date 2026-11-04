@@ -57,6 +57,7 @@ useDialog(panel, open, () => { open.value = false })
           <nav class="mt-6" aria-label="Mobile">
             <ul class="space-y-1 text-lg font-medium">
               <li><NuxtLink to="/shop" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Shop all</NuxtLink></li>
+              <li><NuxtLink to="/custom-keyring" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Custom Keyring</NuxtLink></li>
               <li><NuxtLink to="/custom-order" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Custom Order</NuxtLink></li>
             </ul>
 

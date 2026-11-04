@@ -39,6 +39,14 @@ export default defineNuxtConfig({
       { name: 'Space Grotesk', provider: 'google', weights: [500, 600, 700] },
       { name: 'Inter', provider: 'google', weights: [400, 500, 600] },
       { name: 'Hind Siliguri', provider: 'google', weights: [400, 600], subsets: ['bengali'] },
+      // Name-keyring builder only (/custom-keyring). Used from that page's CSS, so other pages don't load them.
+      { name: 'Fredoka', provider: 'google', weights: [600], subsets: ['latin'] },
+      { name: 'Pacifico', provider: 'google', weights: [400], subsets: ['latin'] },
+      { name: 'Lobster', provider: 'google', weights: [400], subsets: ['latin'] },
+      { name: 'Lilita One', provider: 'google', weights: [400], subsets: ['latin'] },
+      { name: 'Permanent Marker', provider: 'google', weights: [400], subsets: ['latin'] },
+      { name: 'Bungee', provider: 'google', weights: [400], subsets: ['latin'] },
+      { name: 'Bowlby One', provider: 'google', weights: [400], subsets: ['latin'] },
     ],
   },
 

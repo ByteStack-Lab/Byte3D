@@ -42,8 +42,9 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 border-b border-border/70 bg-bg/80 backdrop-blur-md">
-    <div class="container-page flex h-16 items-center gap-4">
+  <!-- Floating pill: as wide as the page container, not the full screen. The page scrolls under its rounded edges. -->
+  <header class="container-page sticky top-0 z-40 pt-3">
+    <div class="flex h-16 items-center gap-3 rounded-2xl border border-border/70 bg-bg/80 px-3 shadow-lg shadow-black/10 backdrop-blur-md sm:gap-4 sm:px-5 lg:rounded-full lg:pl-6 lg:pr-3">
       <LayoutAppLogo />
 
       <nav class="ml-6 hidden items-center gap-1 lg:flex" :aria-label="t('nav.main')">

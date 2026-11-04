@@ -14,6 +14,7 @@
   --color-accent-2: #68dbf2;
   --color-success: #22c55e;
   --color-danger: #ef4444;
+  --color-warning: #fbbf24;
 
   --font-sans: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
@@ -59,6 +60,7 @@
   --color-accent-2: #1d6fb8;
   --color-success: #15803d;
   --color-danger: #dc2626;
+  --color-warning: #b45309;
   --shadow-glow: 0 0 0 1px rgb(53 51 205 / 0.45), 0 10px 30px -10px rgb(53 51 205 / 0.35);
 }
 @media (prefers-color-scheme: light) {
@@ -76,6 +78,7 @@
     --color-accent-2: #1d6fb8;
     --color-success: #15803d;
     --color-danger: #dc2626;
+  --color-warning: #b45309;
     --shadow-glow: 0 0 0 1px rgb(53 51 205 / 0.45), 0 10px 30px -10px rgb(53 51 205 / 0.35);
   }
 }

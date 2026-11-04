@@ -233,6 +233,7 @@ async function submit() {
               <input v-model="paymentMethod" type="radio" name="payment" :value="m" class="size-4 accent-[var(--color-accent)]">
               <span class="font-medium">{{ PAYMENT_LABELS[m] }}</span>
               <span v-if="m === 'cod'" class="ml-auto text-xs text-muted">Pay when it arrives</span>
+              <span v-else class="ml-auto text-xs text-muted">Pay securely now</span>
             </label>
           </div>
         </fieldset>

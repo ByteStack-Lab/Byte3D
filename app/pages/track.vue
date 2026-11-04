@@ -92,6 +92,13 @@ async function submit() {
 
       <div v-if="order" class="mt-8">
         <AccountOrderCard :order="order" />
+        <div
+          v-if="order.payment_method !== 'cod' && order.payment_status !== 'paid' && order.payment_status !== 'refunded' && order.status !== 'cancelled' && order.status !== 'returned'"
+          class="mt-4 rounded-lg border border-warning/40 bg-warning/10 p-4"
+        >
+          <p class="mb-3 text-sm font-medium">This order is not paid yet.</p>
+          <AccountOrderPayNow :order-number="order.order_number" :phone="form.phone" />
+        </div>
         <section v-if="order.timeline.length" class="mt-6" aria-labelledby="timeline-heading">
           <h2 id="timeline-heading" class="text-lg font-bold">History</h2>
           <ol class="mt-3 space-y-3 border-l border-border pl-5">

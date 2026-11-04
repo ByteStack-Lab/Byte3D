@@ -33,6 +33,7 @@ useDialog(panel, open, () => { open.value = false })
         ref="panel"
         role="dialog"
         aria-modal="true"
+        data-lenis-prevent
         :aria-label="t('nav.menu')"
         class="fixed inset-y-0 left-0 z-50 flex w-[min(22rem,88vw)] flex-col border-r border-border bg-bg shadow-2xl will-change-transform"
       >

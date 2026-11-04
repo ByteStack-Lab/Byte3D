@@ -6,6 +6,13 @@ const props = withDefaults(defineProps<{ product: ProductCard, priority?: boolea
 const { t } = useLocale()
 const salePercent = computed(() => discountPercent(props.product.price, props.product.compare_at_price))
 const href = computed(() => `/products/${props.product.slug}`)
+
+// Photo morph into the product page gallery (View Transitions). Only the card the visitor is about to open
+// carries the transition name, because names must be unique on the page. Armed early (hover / press / focus),
+// before the click starts the navigation.
+const vtProduct = useState<string | null>('vt-product', () => null)
+const arm = () => { vtProduct.value = props.product.slug }
+const photoStyle = computed(() => (vtProduct.value === props.product.slug ? { viewTransitionName: 'product-image' } : undefined))
 const cta = computed(() => {
   if (!props.product.in_stock) return { label: t('product.outOfStock'), disabled: true }
   if (props.product.is_customizable) return { label: t('product.customize'), disabled: false }
@@ -16,8 +23,11 @@ const cta = computed(() => {
 <template>
   <article
     class="group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface transition duration-200 focus-within:border-accent/70 hover:-translate-y-1 hover:border-accent/60 hover:shadow-glow"
+    @pointerenter="arm"
+    @pointerdown="arm"
+    @focusin="arm"
   >
-    <div class="relative aspect-square overflow-hidden bg-surface-2">
+    <div class="relative aspect-square overflow-hidden bg-surface-2" :style="photoStyle">
       <NuxtImg
         :src="product.thumbnail.url"
         :alt="product.thumbnail.alt"

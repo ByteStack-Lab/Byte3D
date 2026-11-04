@@ -8,6 +8,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), selec
  */
 export function useDialog(panel: Ref<HTMLElement | null>, open: Ref<boolean>, close: () => void) {
   let previouslyFocused: HTMLElement | null = null
+  const smooth = useNuxtApp().$smooth
 
   function onKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
@@ -33,6 +34,7 @@ export function useDialog(panel: Ref<HTMLElement | null>, open: Ref<boolean>, cl
   function release() {
     document.removeEventListener('keydown', onKeydown)
     document.documentElement.style.removeProperty('overflow')
+    smooth.start()
     previouslyFocused?.focus?.()
     previouslyFocused = null
   }
@@ -42,6 +44,7 @@ export function useDialog(panel: Ref<HTMLElement | null>, open: Ref<boolean>, cl
     if (isOpen) {
       previouslyFocused = document.activeElement as HTMLElement | null
       document.documentElement.style.overflow = 'hidden'
+      smooth.stop()
       document.addEventListener('keydown', onKeydown)
       await nextTick()
       panel.value?.querySelector<HTMLElement>(FOCUSABLE)?.focus()

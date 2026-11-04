@@ -101,7 +101,19 @@ Tokens (dark values; placeholders until the Byte3D brand kit exists — keep the
 - Radius 12 / 16 / 24. Container `max-w-7xl`, side gutter 16px on mobile.
 - Fonts via `@nuxt/fonts`: headings **Space Grotesk**, body **Inter**, Bangla fallback **Hind Siliguri**.
 - Motion: 150–250 ms transitions, card hover lift + image swap, subtle accent glow. Respect
-  `prefers-reduced-motion` everywhere.
+  `prefers-reduced-motion` everywhere. The motion layer (all in `assets/css/motion.css` + the files below):
+  - **Page transition**: native View Transitions (`experimental.viewTransition`), root cross-fade; `plugins/motion.client.ts`
+    caps a frozen transition at 700 ms (slow API) and adds `html.has-navigated`, which makes the new page's content rise.
+    Never animate the first load (LCP). Don't re-add `html { scroll-behavior: smooth }`: it makes scroll-to-top slide after a page change.
+  - **Card photo → gallery morph**: `ProductCard` / `ProductGallery` share `view-transition-name: product-image`, set only on the
+    card about to open (`useState('vt-product')`), because names must be unique per page.
+  - **`v-reveal`** (`plugins/reveal.ts`): scroll fade/rise, only for elements that start below the fold; SSR shows everything.
+    Don't put it on an element that has its own `transform` transition/animation.
+  - **Desktop only** (`canUseRichMotion()`: fine pointer, no reduced motion, no Save-Data): Lenis smooth wheel scroll
+    (`plugins/motion.client.ts`) and GSAP scroll scenes on the home page (`composables/useHomeScroll.ts`, dynamic import, idle).
+    Phones keep native scrolling and get CSS-only motion. Scrollable overlays need `data-lenis-prevent`; modal code calls
+    `$smooth.stop()/start()` (see `useDialog`).
+  - Fly-to-cart (`flyToCart` in `utils/motion.ts`) and the cart badge pop are decorative; the cart store is untouched.
 - Contrast WCAG AA on dark backgrounds; visible focus rings (accent color).
 
 ## Homepage (`pages/index.vue`)

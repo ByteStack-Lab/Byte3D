@@ -64,6 +64,7 @@ function addToCart(): boolean {
     customizationLabels: describeCustomization(product.value.customization_schema, clean, t),
   })
   track('AddToCart', { name: product.value.name, ids: [variant.value.sku], value: unitPrice.value * quantity.value, quantity: quantity.value })
+  flyToCart(document.querySelector('[data-fly-source]'), document.activeElement)
   justAdded.value = true
   clearTimeout(addedTimer)
   addedTimer = setTimeout(() => { justAdded.value = false }, 5000)
@@ -163,6 +164,7 @@ useHead(() => {
           :model-url="product.model_3d_url"
           :preview-text="previewText"
           :name="product.name"
+          :slug="product.slug"
         />
       </div>
 
@@ -260,13 +262,13 @@ useHead(() => {
       </div>
     </div>
 
-    <section class="mt-14 max-w-3xl" aria-labelledby="desc-heading">
+    <section v-reveal class="mt-14 max-w-3xl" aria-labelledby="desc-heading">
       <h2 id="desc-heading" class="text-xl font-bold sm:text-2xl">{{ t('product.about') }}</h2>
       <!-- eslint-disable-next-line vue/no-v-html -- trusted HTML authored by admins in Filament -->
       <div class="description mt-4 space-y-4 leading-relaxed text-muted" v-html="product.description_html" />
     </section>
 
-    <section v-if="product.related.length" class="mt-16" aria-labelledby="related-heading">
+    <section v-if="product.related.length" v-reveal class="mt-16" aria-labelledby="related-heading">
       <h2 id="related-heading" class="text-xl font-bold sm:text-2xl">{{ t('product.related') }}</h2>
       <ul class="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">
         <li v-for="p in product.related" :key="p.id"><ProductCard :product="p" /></li>

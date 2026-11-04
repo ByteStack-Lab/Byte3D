@@ -13,10 +13,13 @@ useSeoMeta({
   ogImage: () => abs(data.value?.data.featured_products[0]?.thumbnail.url ?? '/images/hero-poster.webp'),
 })
 useCanonical('/')
+
+const root = ref<HTMLElement | null>(null)
+useHomeScroll(root)
 </script>
 
 <template>
-  <div v-if="data">
+  <div v-if="data" ref="root">
     <HomeHeroSection :hero="data.data.hero" />
     <HomeCategoryGrid v-if="data.data.categories.length" :categories="data.data.categories" />
     <HomeFeaturedProducts v-if="data.data.featured_products.length" :products="data.data.featured_products" />

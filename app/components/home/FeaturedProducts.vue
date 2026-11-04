@@ -7,7 +7,7 @@ const { t } = useLocale()
 
 <template>
   <section aria-labelledby="featured-heading" class="container-page mt-16 sm:mt-24">
-    <div class="mb-6 flex items-end justify-between gap-4">
+    <div v-reveal class="mb-6 flex items-end justify-between gap-4">
       <div>
         <h2 id="featured-heading" class="text-2xl font-bold sm:text-3xl">{{ t('home.featured') }}</h2>
         <p class="mt-1 text-sm text-muted">{{ t('home.featuredSub') }}</p>
@@ -17,7 +17,7 @@ const { t } = useLocale()
       </NuxtLink>
     </div>
     <ul class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-      <li v-for="p in products" :key="p.id">
+      <li v-for="p in products" :key="p.id" v-reveal>
         <ProductCard :product="p" />
       </li>
     </ul>

@@ -1,0 +1,115 @@
+/*
+ * Motion layer: page transitions, scroll reveal, smooth-scroll support, small UI pops.
+ * Everything that moves is inside `prefers-reduced-motion: no-preference`. Nothing here may block LCP:
+ * content is fully visible without JS, and only elements below the fold are ever hidden (see plugins/reveal.ts).
+ */
+
+/* ---- Easing tokens ----------------------------------------------------- */
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- Page transition (View Transitions API) -------------------------- */
+  /* The header is identical on both pages, so a plain cross-fade of the root leaves it untouched. */
+  ::view-transition-old(root) {
+    animation: 0.22s var(--ease-out-quart) both vt-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation: 0.38s var(--ease-out-quart) both vt-fade-in;
+  }
+  @keyframes vt-fade-out { to { opacity: 0; } }
+  @keyframes vt-fade-in { from { opacity: 0; } }
+
+  /* Card photo → product gallery (and back) morph. Only one element carries this name at a time. */
+  ::view-transition-group(product-image) {
+    animation-duration: 0.5s;
+    animation-timing-function: var(--ease-out-expo);
+    border-radius: 0.75rem;
+    overflow: clip;
+  }
+  ::view-transition-old(product-image),
+  ::view-transition-new(product-image) {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The new page's content rises a few px as it arrives. Only after the first client-side navigation,
+     so the first load (the LCP) is never animated. Also works as the fallback where View Transitions are missing. */
+  html.has-navigated main > * {
+    animation: 0.5s var(--ease-out-expo) backwards page-rise;
+  }
+  @keyframes page-rise {
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---- Scroll reveal ----------------------------------------------------- */
+  /* `data-reveal` is only ever set by the v-reveal directive, on elements that start below the fold. */
+  [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    will-change: opacity, transform;
+  }
+  [data-reveal][data-reveal-kind="fade"] { transform: none; }
+  [data-reveal][data-reveal-kind="scale"] { transform: scale(0.96); }
+  [data-reveal="in"] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.7s var(--ease-out-expo) var(--reveal-delay, 0ms),
+      transform 0.7s var(--ease-out-expo) var(--reveal-delay, 0ms);
+  }
+
+  /* ---- Small UI pops ------------------------------------------------------ */
+  .badge-pop { animation: 0.45s var(--ease-out-expo) badge-pop; }
+  @keyframes badge-pop {
+    0% { transform: scale(0.4); }
+    60% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  .cart-bump { animation: 0.5s var(--ease-out-quart) cart-bump; }
+  @keyframes cart-bump {
+    0%, 100% { transform: translateY(0); }
+    35% { transform: translateY(-4px) rotate(-8deg); }
+    65% { transform: translateY(0) rotate(4deg); }
+  }
+
+  /* Hero entrance: staggered rise (the h1 has no delay so the LCP text is never held back).
+     `backwards`, not `both`: once finished, the element returns to its normal style so GSAP can move it. */
+  .hero-in { animation: 0.5s var(--ease-out-expo) backwards fade-up-lg; animation-delay: var(--d, 0ms); }
+  @keyframes fade-up-lg {
+    from { opacity: 0; transform: translate3d(0, 18px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Header gets a touch more presence once the page has scrolled. */
+  .header-pill { transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+}
+
+/* Header pill state (set by AppHeader on scroll). Works with or without motion. */
+.header-pill[data-scrolled="true"] {
+  background-color: color-mix(in srgb, var(--color-bg) 92%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.45);
+}
+
+/* ---- Lenis (desktop smooth scroll) — rules from the Lenis docs ----------- */
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* ---- Fly-to-cart clone (see utils/motion.ts) ------------------------------ */
+.fly-clone {
+  position: fixed;
+  z-index: 70;
+  pointer-events: none;
+  border-radius: 0.75rem;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.4);
+  will-change: transform, opacity;
+}

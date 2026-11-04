@@ -89,7 +89,8 @@
     color: var(--color-text);
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
+    /* No global `scroll-behavior: smooth`: it made the scroll-to-top after a page change slide, which fights
+       the page transition. Components that want smooth scrolling ask for it (`behavior: 'smooth'`). */
   }
   body {
     font-family: var(--font-sans);

@@ -38,6 +38,7 @@ function apply() {
         ref="panel"
         role="dialog"
         aria-modal="true"
+        data-lenis-prevent
         :aria-label="t('filter.title')"
         class="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-xl border-t border-border bg-bg shadow-2xl lg:hidden"
       >

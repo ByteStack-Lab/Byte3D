@@ -7,7 +7,11 @@ export default defineNuxtConfig({
 
   modules: ['@nuxt/image', '@nuxt/fonts', '@pinia/nuxt', '@nuxt/eslint'],
 
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', '~/assets/css/motion.css'],
+
+  // Native cross-page transition (no JS library). Browsers without it, and visitors who ask for
+  // reduced motion, simply get an instant page change. See app/plugins/motion.client.ts.
+  experimental: { viewTransition: true },
 
   vite: {
     plugins: [tailwindcss()],

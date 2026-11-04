@@ -18,22 +18,22 @@ const trust = [
 </script>
 
 <template>
-  <section class="relative isolate overflow-hidden">
+  <section data-scene="hero" class="relative isolate overflow-hidden">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_75%_30%,rgb(102_117_247/0.16),transparent_70%),radial-gradient(40%_40%_at_10%_80%,rgb(104_219_242/0.08),transparent_70%)]" />
 
     <div class="container-page grid items-center gap-8 py-10 md:py-16 lg:grid-cols-2 lg:gap-12">
       <!-- Text is SSR HTML and the LCP element; the canvas never blocks it. -->
-      <div class="animate-fade-up">
-        <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1 text-xs font-medium text-muted">
+      <div data-scene-text>
+        <p class="hero-in mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1 text-xs font-medium text-muted">
           <span class="size-1.5 animate-pulse rounded-full bg-accent" /> {{ t('hero.nowPrinting') }}
         </p>
-        <h1 class="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
+        <h1 class="hero-in text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
           {{ text(hero.headline, 'hero.defaultHeadline') }}
         </h1>
-        <p class="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+        <p class="hero-in mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg" style="--d: 70ms">
           {{ text(hero.subheadline, 'hero.defaultSubheadline') }}
         </p>
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <div class="hero-in mt-8 flex flex-col gap-3 sm:flex-row" style="--d: 140ms">
           <UiButton :to="hero.primary_cta.href" size="lg">
             {{ text(hero.primary_cta.label, 'hero.defaultShopNow') }} <UiIcon name="arrow-right" :size="18" />
           </UiButton>
@@ -41,7 +41,7 @@ const trust = [
             {{ text(hero.secondary_cta.label, 'nav.customOrder') }}
           </UiButton>
         </div>
-        <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
+        <ul class="hero-in mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted" style="--d: 210ms">
           <li v-for="item in trust" :key="item.key" class="inline-flex items-center gap-2">
             <UiIcon :name="item.icon" :size="16" class="text-accent" /> {{ t(item.key) }}
           </li>

@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { ApiImage } from '~/types/api'
 
-const props = defineProps<{ images: ApiImage[], modelUrl?: string | null, previewText?: string, name: string }>()
+const props = defineProps<{ images: ApiImage[], modelUrl?: string | null, previewText?: string, name: string, slug?: string }>()
+
+// Receives the photo that morphs in from the product card (see ProductCard.vue).
+const vtProduct = useState<string | null>('vt-product', () => null)
+const firstPhotoStyle = (i: number) => (i === 0 && props.slug && vtProduct.value === props.slug ? { viewTransitionName: 'product-image' } : undefined)
 
 const tab = ref<'photos' | '3d'>('photos')
 const index = ref(0)
@@ -44,7 +48,7 @@ const tabBtn = 'min-h-11 rounded-full px-4 text-sm font-medium transition'
     <ProductProduct3DViewer v-if="tab === '3d' && modelUrl" :src="modelUrl" :alt="t('gallery.model3d', { name })" :poster="images[0]?.url" />
 
     <div v-else>
-      <div class="relative overflow-hidden rounded-xl border border-border bg-surface">
+      <div data-fly-source class="relative overflow-hidden rounded-xl border border-border bg-surface">
         <div
           ref="scroller"
           class="scrollbar-none snap-x snap-mandatory overflow-x-auto scroll-smooth"
@@ -61,6 +65,7 @@ const tabBtn = 'min-h-11 rounded-full px-4 text-sm font-medium transition'
               v-for="(img, i) in images"
               :key="img.url"
               class="aspect-square w-full shrink-0 snap-center"
+              :style="firstPhotoStyle(i)"
             >
               <NuxtImg
                 :src="img.url"

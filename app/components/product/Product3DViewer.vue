@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// The wrapper has data-lenis-prevent: the viewer zooms with the wheel, so smooth page scrolling must stay out of it.
 const { t } = useLocale()
 defineProps<{ src: string, alt: string, poster?: string }>()
 
@@ -11,7 +12,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="relative aspect-square overflow-hidden rounded-xl border border-border bg-surface">
+  <div data-lenis-prevent class="relative aspect-square overflow-hidden rounded-xl border border-border bg-surface">
     <UiSkeleton v-if="!ready" class="absolute inset-0 !rounded-none" />
     <model-viewer
       v-if="ready"

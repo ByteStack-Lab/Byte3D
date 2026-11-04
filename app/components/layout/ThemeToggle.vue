@@ -6,12 +6,14 @@ import type { ThemeResolved } from '~/composables/useTheme'
 withDefaults(defineProps<{ variant?: 'icon' | 'segmented' }>(), { variant: 'icon' })
 
 const { resolved, setTheme, toggle } = useTheme()
+const { t } = useLocale()
 
-const options: { value: ThemeResolved, label: string, icon: string }[] = [
-  { value: 'light', label: 'Light', icon: 'sun' },
-  { value: 'dark', label: 'Dark', icon: 'moon' },
-]
+const options = computed<{ value: ThemeResolved, label: string, icon: string }[]>(() => [
+  { value: 'light', label: t('theme.light'), icon: 'sun' },
+  { value: 'dark', label: t('theme.dark'), icon: 'moon' },
+])
 const target = computed(() => (resolved.value === 'light' ? 'dark' : 'light'))
+const switchLabel = computed(() => t(target.value === 'dark' ? 'theme.switchToDark' : 'theme.switchToLight'))
 </script>
 
 <template>
@@ -21,14 +23,14 @@ const target = computed(() => (resolved.value === 'light' ? 'dark' : 'light'))
       v-if="variant === 'icon'"
       type="button"
       class="grid size-11 place-items-center rounded-md text-muted transition hover:bg-surface-2 hover:text-text"
-      :aria-label="`Switch to ${target} mode`"
-      :title="`Switch to ${target} mode`"
+      :aria-label="switchLabel"
+      :title="switchLabel"
       @click="toggle"
     >
       <UiIcon :name="target === 'dark' ? 'moon' : 'sun'" :size="20" />
     </button>
 
-    <div v-else role="radiogroup" aria-label="Theme" class="grid grid-cols-2 gap-1 rounded-lg border border-border bg-surface-2 p-1">
+    <div v-else role="radiogroup" :aria-label="t('theme.label')" class="grid grid-cols-2 gap-1 rounded-lg border border-border bg-surface-2 p-1">
       <button
         v-for="o in options"
         :key="o.value"

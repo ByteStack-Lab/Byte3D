@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const cart = useCartStore()
+const { t, tp } = useLocale()
 // The saved cart only exists in the browser: render the badge after it has loaded so SSR and hydration agree.
-const label = computed(() => (cart.hydrated && cart.count ? `Cart, ${cart.count} item${cart.count === 1 ? '' : 's'}` : 'Cart'))
+const label = computed(() => (cart.hydrated && cart.count ? tp('cart.labelCount', cart.count) : t('cart.label')))
 </script>
 
 <template>

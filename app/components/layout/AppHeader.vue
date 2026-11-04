@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { data: categories } = await useCategories()
+const { t } = useLocale()
 const route = useRoute()
 const router = useRouter()
 
@@ -45,8 +46,8 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
     <div class="container-page flex h-16 items-center gap-4">
       <LayoutAppLogo />
 
-      <nav class="ml-6 hidden items-center gap-1 lg:flex" aria-label="Main">
-        <NuxtLink to="/shop" :class="linkClass" active-class="!text-text">Shop</NuxtLink>
+      <nav class="ml-6 hidden items-center gap-1 lg:flex" :aria-label="t('nav.main')">
+        <NuxtLink to="/shop" :class="linkClass" active-class="!text-text">{{ t('nav.shop') }}</NuxtLink>
 
         <div ref="catWrap" class="relative">
           <button
@@ -58,7 +59,7 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
             aria-controls="cat-menu"
             @click="catOpen = !catOpen"
           >
-            Categories
+            {{ t('nav.categories') }}
             <UiIcon name="chevron-down" :size="16" class="transition" :class="catOpen && 'rotate-180'" />
           </button>
           <Transition
@@ -85,18 +86,18 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
           </Transition>
         </div>
 
-        <NuxtLink to="/custom-keyring" :class="linkClass" active-class="!text-text">Custom Keyring</NuxtLink>
-        <NuxtLink to="/custom-order" :class="linkClass" active-class="!text-text">Custom Order</NuxtLink>
+        <NuxtLink to="/custom-keyring" :class="linkClass" active-class="!text-text">{{ t('nav.customKeyring') }}</NuxtLink>
+        <NuxtLink to="/custom-order" :class="linkClass" active-class="!text-text">{{ t('nav.customOrder') }}</NuxtLink>
       </nav>
 
       <form class="relative ml-auto hidden max-w-xs flex-1 md:block" role="search" @submit.prevent="submitSearch">
-        <label for="header-search" class="sr-only">Search products</label>
+        <label for="header-search" class="sr-only">{{ t('search.products') }}</label>
         <UiIcon name="search" :size="18" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input
           id="header-search"
           v-model="search"
           type="search"
-          placeholder="Search keychains, figurines…"
+          :placeholder="t('search.headerPlaceholder')"
           class="h-10 w-full rounded-full border border-border bg-surface-2 pl-10 pr-4 text-sm placeholder:text-muted/80 transition focus:border-accent focus:outline-none"
         >
       </form>
@@ -105,15 +106,16 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
         <NuxtLink
           to="/shop"
           class="grid size-11 place-items-center rounded-md text-muted transition hover:text-text md:hidden"
-          aria-label="Search products"
+          :aria-label="t('search.products')"
         >
           <UiIcon name="search" :size="22" />
         </NuxtLink>
+        <LayoutLangToggle />
         <LayoutThemeToggle />
         <NuxtLink
           to="/account"
           class="grid size-11 place-items-center rounded-md text-muted transition hover:bg-surface-2 hover:text-text"
-          aria-label="My account"
+          :aria-label="t('nav.account')"
         >
           <UiIcon name="user" :size="22" />
         </NuxtLink>
@@ -121,7 +123,7 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
         <button
           type="button"
           class="grid size-11 place-items-center rounded-md text-text transition hover:bg-surface-2 lg:hidden"
-          aria-label="Open menu"
+          :aria-label="t('nav.openMenu')"
           aria-haspopup="dialog"
           @click="menuOpen = true"
         >

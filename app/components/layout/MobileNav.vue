@@ -2,6 +2,7 @@
 import type { Category } from '~/types/api'
 
 defineProps<{ categories: Category[] }>()
+const { t } = useLocale()
 const open = defineModel<boolean>('open', { required: true })
 const search = defineModel<string>('search', { default: '' })
 const emit = defineEmits<{ search: [] }>()
@@ -31,39 +32,39 @@ useDialog(panel, open, () => { open.value = false })
         ref="panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Menu"
+        :aria-label="t('nav.menu')"
         class="fixed inset-y-0 right-0 z-50 flex w-[min(22rem,88vw)] flex-col border-l border-border bg-bg shadow-2xl"
       >
         <div class="flex h-16 items-center justify-between border-b border-border px-4">
           <LayoutAppLogo />
-          <button type="button" class="grid size-11 place-items-center rounded-md text-muted hover:text-text" aria-label="Close menu" @click="open = false">
+          <button type="button" class="grid size-11 place-items-center rounded-md text-muted hover:text-text" :aria-label="t('nav.closeMenu')" @click="open = false">
             <UiIcon name="close" :size="22" />
           </button>
         </div>
 
         <div class="flex-1 overflow-y-auto px-4 py-5">
           <form role="search" class="relative" @submit.prevent="emit('search')">
-            <label for="mobile-search" class="sr-only">Search products</label>
+            <label for="mobile-search" class="sr-only">{{ t('search.products') }}</label>
             <UiIcon name="search" :size="18" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               id="mobile-search"
               v-model="search"
               type="search"
-              placeholder="Search products…"
+              :placeholder="t('search.placeholder')"
               class="h-12 w-full rounded-md border border-border bg-surface-2 pl-10 pr-4 text-base placeholder:text-muted/80 focus:border-accent focus:outline-none"
             >
           </form>
 
-          <nav class="mt-6" aria-label="Mobile">
+          <nav class="mt-6" :aria-label="t('nav.mobile')">
             <ul class="space-y-1 text-lg font-medium">
-              <li><NuxtLink to="/shop" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Shop all</NuxtLink></li>
-              <li><NuxtLink to="/custom-keyring" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Custom Keyring</NuxtLink></li>
-              <li><NuxtLink to="/custom-order" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Custom Order</NuxtLink></li>
-              <li><NuxtLink to="/track" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">Track order</NuxtLink></li>
-              <li><NuxtLink to="/account" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">My account</NuxtLink></li>
+              <li><NuxtLink to="/shop" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">{{ t('nav.shopAll') }}</NuxtLink></li>
+              <li><NuxtLink to="/custom-keyring" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">{{ t('nav.customKeyring') }}</NuxtLink></li>
+              <li><NuxtLink to="/custom-order" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">{{ t('nav.customOrder') }}</NuxtLink></li>
+              <li><NuxtLink to="/track" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">{{ t('nav.track') }}</NuxtLink></li>
+              <li><NuxtLink to="/account" class="flex min-h-12 items-center rounded-md px-3 hover:bg-surface-2">{{ t('nav.account') }}</NuxtLink></li>
             </ul>
 
-            <p class="mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-muted">Categories</p>
+            <p class="mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-muted">{{ t('nav.categories') }}</p>
             <ul class="mt-2 space-y-0.5">
               <li v-for="c in categories" :key="c.slug">
                 <NuxtLink
@@ -80,8 +81,9 @@ useDialog(panel, open, () => { open.value = false })
 
         <div class="space-y-3 border-t border-border p-4">
           <LayoutThemeToggle variant="segmented" />
+          <LayoutLangToggle block />
           <UiButton href="tel:+8801812209019" variant="secondary" block>
-            <UiIcon name="phone" :size="18" /> Call +880 1812-209019
+            <UiIcon name="phone" :size="18" /> {{ t('call.now', { phone: '+880 1812-209019' }) }}
           </UiButton>
         </div>
       </aside>

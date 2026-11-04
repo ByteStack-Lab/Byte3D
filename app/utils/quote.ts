@@ -1,13 +1,16 @@
+import type { MessageKey } from '~/locales/en'
+import type { Translate } from '~/composables/useLocale'
+
 /** Project types for the custom order form. Values mirror the backend QuoteServiceType enum. */
 export type QuoteServiceType = 'print_from_file' | 'design_and_print' | 'prototype' | 'robotics' | 'laser_engraving' | 'other'
 
-export const QUOTE_SERVICE_TYPES: { value: QuoteServiceType, label: string, hint: string }[] = [
-  { value: 'design_and_print', label: 'Design + print from my idea', hint: 'You have a sketch or photo, we design it' },
-  { value: 'print_from_file', label: 'Print my 3D file', hint: 'You already have an STL / OBJ / 3MF / STEP' },
-  { value: 'prototype', label: 'Prototype', hint: 'A working part to test your product' },
-  { value: 'robotics', label: 'Robotics / electronics parts', hint: 'Brackets, mounts, enclosures, gears' },
-  { value: 'laser_engraving', label: 'Laser engraving', hint: 'Names, logos or 2D designs on a product' },
-  { value: 'other', label: 'Something else', hint: 'Tell us in the details' },
+export const QUOTE_SERVICE_TYPES: { value: QuoteServiceType, key: MessageKey, hintKey: MessageKey }[] = [
+  { value: 'design_and_print', key: 'quote.type.design_and_print', hintKey: 'quote.type.design_and_print.hint' },
+  { value: 'print_from_file', key: 'quote.type.print_from_file', hintKey: 'quote.type.print_from_file.hint' },
+  { value: 'prototype', key: 'quote.type.prototype', hintKey: 'quote.type.prototype.hint' },
+  { value: 'robotics', key: 'quote.type.robotics', hintKey: 'quote.type.robotics.hint' },
+  { value: 'laser_engraving', key: 'quote.type.laser_engraving', hintKey: 'quote.type.laser_engraving.hint' },
+  { value: 'other', key: 'quote.type.other', hintKey: 'quote.type.other.hint' },
 ]
 
 export const QUOTE_DETAILS_MIN = 10
@@ -24,9 +27,9 @@ export function formatFileSize(bytes: number): string {
 }
 
 /** Why a picked file cannot be attached, or null when it is fine. */
-export function quoteFileProblem(file: File): string | null {
+export function quoteFileProblem(file: File, t: Translate): string | null {
   const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-  if (!QUOTE_FILE_EXTENSIONS.includes(ext)) return `${file.name}: use STL, OBJ, 3MF, STEP, PNG, JPG or PDF.`
-  if (file.size > QUOTE_MAX_FILE_BYTES) return `${file.name} is bigger than 50 MB.`
+  if (!QUOTE_FILE_EXTENSIONS.includes(ext)) return t('quote.errFileType', { name: file.name })
+  if (file.size > QUOTE_MAX_FILE_BYTES) return t('quote.errFileSize', { name: file.name })
   return null
 }

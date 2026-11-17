@@ -25,7 +25,7 @@ useCanonical()
     <h2>How it works</h2>
     <p>
       Every order is checked by a person. For custom work we call you to confirm the details before we start, so you know the price and
-      the delivery time. Ready products ship across Bangladesh, and you can pay with cash on delivery.
+      the delivery time. Ready products ship across Bangladesh.
     </p>
     <p>
       Have something in mind? <NuxtLink to="/custom-order">Send us your project</NuxtLink> or <NuxtLink to="/contact">get in touch</NuxtLink>.

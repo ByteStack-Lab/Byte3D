@@ -65,7 +65,6 @@ const socials = computed(() => [
           <li v-if="s">
             <a :href="`mailto:${s.contact.email}`" class="inline-flex items-center gap-2 transition hover:text-accent"><UiIcon name="mail" :size="16" />{{ s.contact.email }}</a>
           </li>
-          <li class="inline-flex items-center gap-2"><UiIcon name="wallet" :size="16" />{{ t('footer.cod') }}</li>
           <li class="inline-flex items-center gap-2"><UiIcon name="truck" :size="16" />{{ t('footer.delivery') }}</li>
         </ul>
       </div>

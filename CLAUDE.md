@@ -124,7 +124,7 @@ Show skeletons during client-side navigation. Section order: Hero → Categories
 **Layout.** Desktop: two columns — left text, right 3D canvas (~1:1, min-height 460px).
 Mobile: text first, canvas below (height ~320px).
 Left column: headline (h1), subheadline, primary CTA "Shop Now" → `/shop`, secondary CTA
-"Custom Order" → `/custom-order`, trust row: "Custom designs · Delivery across Bangladesh · Cash on delivery".
+"Custom Order" → `/custom-order`, trust row: "Custom designs · Delivery across Bangladesh".
 The text is SSR HTML and is the LCP element. The canvas must never block LCP.
 
 **Scene** (`HeroPrint3D.client.vue` renders; `usePrintScene.ts` owns the logic):

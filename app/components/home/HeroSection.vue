@@ -13,7 +13,6 @@ const ready = ref(false)
 const trust = [
   { icon: 'palette', key: 'hero.trustCustom' as const },
   { icon: 'truck', key: 'footer.delivery' as const },
-  { icon: 'wallet', key: 'footer.cod' as const },
 ]
 </script>
 

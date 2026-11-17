@@ -243,7 +243,6 @@ useHead(() => {
           </p>
 
           <ul class="mt-4 grid gap-2 border-t border-border pt-4 text-sm text-muted sm:grid-cols-2">
-            <li class="flex items-center gap-2"><UiIcon name="wallet" :size="16" class="text-accent" /> {{ t('footer.cod') }}</li>
             <li class="flex items-center gap-2"><UiIcon name="truck" :size="16" class="text-accent" /> {{ t('footer.delivery') }}</li>
           </ul>
           <p class="mt-3 text-xs text-muted">

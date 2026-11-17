@@ -191,7 +191,6 @@ function removeUnavailable() {
         <p v-if="hasUnavailable" class="mt-2 text-xs text-danger">{{ t('cart.removeToContinue') }}</p>
 
         <ul class="mt-5 space-y-2 border-t border-border pt-4 text-xs text-muted">
-          <li class="flex items-center gap-2"><UiIcon name="wallet" :size="14" class="text-accent" /> {{ t('cart.payCod') }}</li>
           <li class="flex items-center gap-2"><UiIcon name="truck" :size="14" class="text-accent" /> {{ t('footer.delivery') }}</li>
         </ul>
       </aside>

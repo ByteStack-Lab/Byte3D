@@ -3,7 +3,7 @@ import type { ProductDetail } from '~/types/api'
 
 useSeoMeta({
   title: 'Custom name keyring — design it online',
-  description: 'Type a name, pick a font and colours, and see your 3D printed keyring or bag tag live. Made in Bangladesh, cash on delivery.',
+  description: 'Type a name, pick a font and colours, and see your 3D printed keyring or bag tag live. Made in Bangladesh.',
   ogTitle: 'Design your custom name keyring — Byte3D',
 })
 useCanonical()
@@ -162,7 +162,7 @@ const input = 'h-12 w-full rounded-md border border-border bg-surface-2 px-4 tex
             <div class="text-sm">
               <p class="font-semibold">Ordering a few? One delivery charge for all.</p>
               <p class="mt-0.5 text-muted">
-                <template v-if="s">Inside Dhaka {{ formatTaka(s.shipping.inside_dhaka) }} · Outside Dhaka {{ formatTaka(s.shipping.outside_dhaka) }} · </template>Cash on delivery
+                <template v-if="s">Inside Dhaka {{ formatTaka(s.shipping.inside_dhaka) }} · Outside Dhaka {{ formatTaka(s.shipping.outside_dhaka) }}</template>
               </p>
             </div>
           </div>
@@ -340,7 +340,6 @@ const input = 'h-12 w-full rounded-md border border-border bg-surface-2 px-4 tex
             <ul class="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-4 text-xs text-muted">
               <li class="inline-flex items-center gap-1.5"><UiIcon name="cube" :size="15" class="text-accent-2" /> 3D printed in PLA</li>
               <li class="inline-flex items-center gap-1.5"><UiIcon name="clock" :size="15" class="text-accent-2" /> Ready in {{ product.production_days?.min ?? 2 }}–{{ product.production_days?.max ?? 4 }} days</li>
-              <li class="inline-flex items-center gap-1.5"><UiIcon name="wallet" :size="15" class="text-accent-2" /> Cash on delivery</li>
             </ul>
             <p class="mt-3 text-xs text-muted">
               The preview is a close guide — we confirm the final design and price with you before printing.

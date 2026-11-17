@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
-  QUOTE_DETAILS_MAX, QUOTE_DETAILS_MIN, QUOTE_FILE_ACCEPT, QUOTE_MAX_FILES, QUOTE_SERVICE_TYPES,
-  formatFileSize, quoteFileProblem, type QuoteServiceType,
+  QUOTE_COLOR_COUNTS, QUOTE_DETAILS_MAX, QUOTE_DETAILS_MIN, QUOTE_FILE_ACCEPT, QUOTE_FINISHES, QUOTE_MATERIALS, QUOTE_MAX_FILES,
+  QUOTE_SERVICE_TYPES, QUOTE_USE_CASES, QUOTE_ZONES, formatFileSize, quoteFileProblem, type QuoteServiceType,
 } from '~/utils/quote'
 
 const { t } = useLocale()
@@ -21,7 +21,7 @@ const steps = computed(() => [
   { n: '3', title: t('quote.step3Title'), text: t('quote.step3Text') },
 ])
 
-const emptyForm = () => ({ service_type: '' as QuoteServiceType | '', name: '', phone: '', description: '', email: '', quantity: '', material_preference: '', deadline: '' })
+const emptyForm = () => ({ service_type: '' as QuoteServiceType | '', name: '', phone: '', description: '', email: '', quantity: '', material_preference: '', deadline: '', size_text: '', color_count: '', colors: '', use_case: '', finish: '', shipping_zone: '' })
 const form = reactive(emptyForm())
 const files = ref<File[]>([])
 const fileProblem = ref<string | null>(null)
@@ -71,7 +71,7 @@ async function submit() {
   try {
     // Multipart, so files can ride along. Empty optional fields are left out.
     const body = new FormData()
-    const values: Record<string, string> = { ...form, name: form.name.trim(), phone: normalizePhone(form.phone), description: form.description.trim(), email: form.email.trim(), material_preference: form.material_preference.trim() }
+    const values: Record<string, string> = { ...form, name: form.name.trim(), phone: normalizePhone(form.phone), description: form.description.trim(), email: form.email.trim(), size_text: form.size_text.trim(), colors: form.colors.trim() }
     for (const [key, value] of Object.entries(values)) if (value !== '') body.append(key, value)
     for (const [key, value] of Object.entries(trackingContext())) if (value) body.append(`tracking[${key}]`, value)
     for (const file of files.value) body.append('files[]', file)
@@ -213,6 +213,68 @@ async function submit() {
             <p id="q-files-msg" class="min-h-4 text-xs text-danger" :role="fileProblem ? 'alert' : undefined">{{ fileProblem }}</p>
           </fieldset>
 
+          <fieldset class="rounded-md border border-border bg-surface-2/30 px-4 pb-2 pt-3">
+            <legend class="px-1 text-sm font-medium">{{ t('quote.specs') }} <span class="text-xs font-normal text-muted">{{ t('common.optional') }}</span></legend>
+            <p class="mb-2 text-xs text-muted">{{ t('quote.specsHint') }}</p>
+            <div class="grid gap-x-4 sm:grid-cols-2">
+              <UiField id="q-qty" :label="t('quote.howMany')" :error="errors.quantity">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-qty" v-model="form.quantity" type="number" inputmode="numeric" min="1" max="100000" placeholder="1" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+              <UiField id="q-size" :label="t('quote.size')" :error="errors.size_text">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-size" v-model="form.size_text" type="text" maxlength="80" :placeholder="t('quote.sizePlaceholder')" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+              <UiField id="q-material" :label="t('quote.material')" :error="errors.material_preference">
+                <template #default="{ invalid, describedBy }">
+                  <select id="q-material" v-model="form.material_preference" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                    <option value="">{{ t('quote.choose') }}</option>
+                    <option v-for="m in QUOTE_MATERIALS" :key="m.value" :value="m.value">{{ t(m.key) }}</option>
+                  </select>
+                </template>
+              </UiField>
+              <UiField id="q-use" :label="t('quote.useCase')" :error="errors.use_case">
+                <template #default="{ invalid, describedBy }">
+                  <select id="q-use" v-model="form.use_case" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                    <option value="">{{ t('quote.choose') }}</option>
+                    <option v-for="u in QUOTE_USE_CASES" :key="u.value" :value="u.value">{{ t(u.key) }}</option>
+                  </select>
+                </template>
+              </UiField>
+              <UiField id="q-colorcount" :label="t('quote.colorCount')" :error="errors.color_count">
+                <template #default="{ invalid, describedBy }">
+                  <select id="q-colorcount" v-model="form.color_count" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                    <option value="">{{ t('quote.choose') }}</option>
+                    <option v-for="n in QUOTE_COLOR_COUNTS" :key="n" :value="String(n)">{{ n === 1 ? t('quote.colorCount.one') : t('quote.colorCount.many', { n }) }}</option>
+                  </select>
+                </template>
+              </UiField>
+              <UiField id="q-colors" :label="t('quote.colors')" :error="errors.colors">
+                <template #default="{ invalid, describedBy }">
+                  <input id="q-colors" v-model="form.colors" type="text" maxlength="100" :placeholder="t('quote.colorsPlaceholder')" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                </template>
+              </UiField>
+              <UiField id="q-finish" :label="t('quote.finish')" :error="errors.finish">
+                <template #default="{ invalid, describedBy }">
+                  <select id="q-finish" v-model="form.finish" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                    <option value="">{{ t('quote.choose') }}</option>
+                    <option v-for="f in QUOTE_FINISHES" :key="f.value" :value="f.value">{{ t(f.key) }}</option>
+                  </select>
+                </template>
+              </UiField>
+              <UiField id="q-zone" :label="t('quote.delivery')" :error="errors.shipping_zone">
+                <template #default="{ invalid, describedBy }">
+                  <select id="q-zone" v-model="form.shipping_zone" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
+                    <option value="">{{ t('quote.choose') }}</option>
+                    <option v-for="z in QUOTE_ZONES" :key="z.value" :value="z.value">{{ t(z.key) }}</option>
+                  </select>
+                </template>
+              </UiField>
+            </div>
+          </fieldset>
+
           <details class="group rounded-md border border-border bg-surface-2/30 open:bg-surface-2/30">
             <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-medium">
               <span>{{ t('quote.more') }} <span class="text-xs font-normal text-muted">{{ t('quote.moreHint') }}</span></span>
@@ -222,16 +284,6 @@ async function submit() {
               <UiField id="q-email" :label="t('checkout.email')" :error="errors.email">
                 <template #default="{ invalid, describedBy }">
                   <input id="q-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" maxlength="150" placeholder="you@example.com" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
-                </template>
-              </UiField>
-              <UiField id="q-qty" :label="t('quote.howMany')" :error="errors.quantity">
-                <template #default="{ invalid, describedBy }">
-                  <input id="q-qty" v-model="form.quantity" type="number" inputmode="numeric" min="1" max="100000" placeholder="1" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
-                </template>
-              </UiField>
-              <UiField id="q-material" :label="t('quote.material')" :error="errors.material_preference">
-                <template #default="{ invalid, describedBy }">
-                  <input id="q-material" v-model="form.material_preference" type="text" maxlength="100" :placeholder="t('quote.materialPlaceholder')" :class="inputClass(invalid)" :aria-invalid="invalid" :aria-describedby="describedBy">
                 </template>
               </UiField>
               <UiField id="q-deadline" :label="t('quote.neededBy')" :error="errors.deadline">

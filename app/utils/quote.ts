@@ -13,6 +13,31 @@ export const QUOTE_SERVICE_TYPES: { value: QuoteServiceType, key: MessageKey, hi
   { value: 'other', key: 'quote.type.other', hintKey: 'quote.type.other.hint' },
 ]
 
+/** Pricing details. Values mirror the backend (material is free text there; the rest are enums). */
+export const QUOTE_MATERIALS: { value: string, key: MessageKey }[] = [
+  { value: 'PLA', key: 'quote.material.pla' },
+  { value: 'PETG', key: 'quote.material.petg' },
+  { value: 'TPU', key: 'quote.material.tpu' },
+  { value: 'Not sure', key: 'quote.material.unsure' },
+]
+/** The printer's AMS holds 4 spools, so 4 colours is the most one print can have. */
+export const QUOTE_COLOR_COUNTS = [1, 2, 3, 4]
+export const QUOTE_USE_CASES: { value: string, key: MessageKey }[] = [
+  { value: 'display', key: 'quote.useCase.display' },
+  { value: 'functional', key: 'quote.useCase.functional' },
+  { value: 'outdoor', key: 'quote.useCase.outdoor' },
+  { value: 'flexible', key: 'quote.useCase.flexible' },
+]
+export const QUOTE_FINISHES: { value: string, key: MessageKey }[] = [
+  { value: 'raw', key: 'quote.finish.raw' },
+  { value: 'sanded', key: 'quote.finish.sanded' },
+  { value: 'painted', key: 'quote.finish.painted' },
+]
+export const QUOTE_ZONES: { value: string, key: MessageKey }[] = [
+  { value: 'inside_dhaka', key: 'quote.delivery.inside_dhaka' },
+  { value: 'outside_dhaka', key: 'quote.delivery.outside_dhaka' },
+]
+
 export const QUOTE_DETAILS_MIN = 10
 export const QUOTE_DETAILS_MAX = 3000
 

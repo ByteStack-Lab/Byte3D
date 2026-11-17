@@ -5,6 +5,8 @@
  */
 import type * as ThreeTypes from 'three'
 
+import { LOGO_SHAPE } from '../utils/logoShape'
+
 type Three = typeof ThreeTypes
 
 export interface PrintSceneOptions {
@@ -41,7 +43,19 @@ const smooth = (t: number) => t * t * (3 - 2 * t)
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 const tri = (x: number) => Math.abs((x - Math.floor(x)) * 2 - 1) * 2 - 1
 
+/** The logo artwork, painted onto the printed logo. Resolves to null if it fails to load (the model then prints in plain blue). */
+function loadLogoImage(): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.decoding = 'async'
+    img.onload = () => resolve(img)
+    img.onerror = () => resolve(null)
+    img.src = '/images/logo-print.webp'
+  })
+}
+
 export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintScene> {
+  const logoImage = loadLogoImage() // fetched in parallel with three.js
   const THREE = (await import('three')) as Three
   const { RoundedBoxGeometry } = await import('three/examples/jsm/geometries/RoundedBoxGeometry.js')
   const { container, isMobile, reducedMotion } = opts
@@ -215,7 +229,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
     uLayer: { value: 0.085 },
   }
 
-  function makeMaterial(color: number) {
+  function makeMaterial(color: number, map?: ThreeTypes.Texture) {
     const m = new THREE.MeshStandardMaterial({
       color,
       roughness: 0.55,
@@ -223,6 +237,13 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
       side: THREE.DoubleSide,
       clippingPlanes: [clipPlane],
     })
+    if (map) {
+      // keep the artwork's colours vivid under the scene lights
+      m.map = map
+      m.emissive = new THREE.Color(0xffffff)
+      m.emissiveMap = map
+      m.emissiveIntensity = 0.22
+    }
     m.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, uniforms)
       shader.vertexShader = shader.vertexShader
@@ -250,6 +271,42 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
     holder.add(obj)
     holder.scale.setScalar(MODEL_SCALE)
     return holder
+  }
+
+  const logoReady = await logoImage
+
+  /** The Byte3D logo: its traced silhouette extruded into a chunky plaque, painted with the logo artwork. ~3 tall. */
+  function logo() {
+    const H = 3.0
+    const W = H * LOGO_SHAPE.aspect
+    const depth = 0.55
+    const toWorld = ([x, y]: [number, number]) => new THREE.Vector2((x - 0.5) * W, y * H)
+    const shape = new THREE.Shape(LOGO_SHAPE.outer.map(toWorld))
+    for (const hole of LOGO_SHAPE.holes) shape.holes.push(new THREE.Path(hole.map(toWorld)))
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth,
+      bevelEnabled: true,
+      bevelSize: 0.035,
+      bevelOffset: -0.035,
+      bevelThickness: 0.05,
+      bevelSegments: 2,
+    })
+    // UVs straight from the outline, so the front face shows the artwork exactly and the walls take the edge colours
+    const pos = geo.getAttribute('position')
+    const uv = geo.getAttribute('uv')
+    for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) / W + 0.5, pos.getY(i) / H)
+
+    let texture: ThreeTypes.Texture | undefined
+    if (logoReady) {
+      texture = new THREE.Texture(logoReady)
+      texture.colorSpace = THREE.SRGBColorSpace
+      texture.anisotropy = 4
+      texture.needsUpdate = true
+    }
+    const g = new THREE.Group()
+    g.add(new THREE.Mesh(geo, texture ? makeMaterial(0xffffff, texture) : makeMaterial(0x2f7cf6)))
+    g.rotation.y = 0.55 // turned toward the camera while it prints
+    return grounded(g)
   }
 
   /** Mini robot: rounded torso and head, capsule arms, antenna. ~2.7 tall, bottom on y = 0. */
@@ -398,7 +455,7 @@ export async function createPrintScene(opts: PrintSceneOptions): Promise<PrintSc
     return grounded(g)
   }
 
-  const models = [robot(), house(), keychain(), spinner()]
+  const models = [logo(), robot(), house(), keychain(), spinner()]
   const modelBox = models.map((m) => {
     const b = new THREE.Box3().setFromObject(m)
     return { box: b, height: b.max.y }

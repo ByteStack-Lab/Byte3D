@@ -154,6 +154,15 @@
 .description ul { list-style: disc; padding-left: 1.25rem; }
 .description ol { list-style: decimal; padding-left: 1.25rem; }
 
+/* ---- Hero dotted-box background ----------------------------------------
+   28px grid; HeroDotsFx.client.vue draws on the same grid (keep CELL in sync). */
+.hero-dots {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--color-text) 24%, transparent) 1.2px, transparent 1.7px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(80% 90% at 68% 42%, #000 25%, transparent 100%);
+  mask-image: radial-gradient(80% 90% at 68% 42%, #000 25%, transparent 100%);
+}
+
 /* ---- Hero 3D stage card ------------------------------------------------ */
 .hero-stage {
   --shadow-ink: 0 0 0;

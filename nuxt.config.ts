@@ -74,7 +74,12 @@ export default defineNuxtConfig({
       meta: [
         { name: 'color-scheme', content: 'dark light' },
       ],
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      link: [
+        { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '48x48', href: '/favicon-48.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+      ],
       // Runs before first paint: apply the saved theme, else follow the device. Prevents a flash.
       script: [{
         key: 'theme-init',

@@ -21,6 +21,11 @@ const trust = [
   <section data-scene="hero" class="relative isolate overflow-hidden">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_75%_30%,rgb(102_117_247/0.16),transparent_70%),radial-gradient(40%_40%_at_10%_80%,rgb(104_219_242/0.08),transparent_70%)]" />
 
+    <!-- Dotted-box grid: static CSS dots everywhere (SSR, phones); on desktop the canvas lifts the boxes toward the cursor. -->
+    <div aria-hidden="true" class="hero-dots pointer-events-none absolute inset-0 -z-10">
+      <HomeHeroDotsFx />
+    </div>
+
     <div class="container-page grid items-center gap-8 py-10 md:py-16 lg:grid-cols-2 lg:gap-12">
       <!-- Text is SSR HTML and the LCP element; the canvas never blocks it. -->
       <div data-scene-text>

@@ -113,14 +113,7 @@ const linkClass = 'rounded-md px-3 py-2 text-sm font-medium text-muted transitio
       </form>
 
       <div class="ml-auto flex items-center gap-1 md:ml-0">
-        <NuxtLink
-          to="/shop"
-          class="grid size-11 place-items-center rounded-md text-muted transition hover:text-text md:hidden"
-          :aria-label="t('search.products')"
-        >
-          <UiIcon name="search" :size="22" />
-        </NuxtLink>
-        <!-- Small screens switch language from the side menu instead. -->
+        <!-- Small screens search and switch language from the side menu instead. -->
         <LayoutLangToggle class="max-lg:hidden" />
         <LayoutThemeToggle />
         <NuxtLink
